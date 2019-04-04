@@ -1,0 +1,47 @@
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+  Thread 0: ... Regiao Critica ... 
+  Thread 0: ... Regiao Critica ... 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+  Thread 0: ... Regiao Critica ... 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+  Thread 0: ... Regiao Critica ... 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+  Thread 0: ... Regiao Critica ... 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+  Thread   Thread 0: ... Regiao Critica ... 
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+  Thread 0: ... Regiao Critica ... 
+  Thread 0: ... Regiao Critica ... 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+  Thread 0: ... Regiao Critica ... 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+  Thread   Thread 0: ... Regiao Critica ... 
+***@***o:~$ gcc -pthread -o peterson  peterson.c && ./peterson
+Thread "Main": Algoritmo de "Peterson" 
+  Thread 0: ... Regiao Critica ... 
+Thread "Main": Sincroniza termino com Threads 0 e 1.
+  Thread 0: ... Regiao Critica ... 
+  Thread 0: ... Regiao Critica ... 
+***@***o:~$ 
