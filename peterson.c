@@ -38,19 +38,19 @@ void leave_region(int process){ // quem estiver saindo
 }
 
 /* ************************************************** Thread */
-void pth( int pID ) //cria uma thread generica. Só precisa entrar com o numero da thread. 0 ou 1, por enquando tepois vai ate 5
+void *pth( void *arg ) //cria uma thread generica. Só precisa entrar com o numero da thread. 0 ou 1, por enquando tepois vai ate 5
 {
   int i, j, k;
-  
+  int * pID = ((int *)arg);
+
   for( i=0; i<N; i++ ) {
     /* Prepara-se para ENTRAR da Regiao Critica */
     enter_region (pID);
 
     /* Processo dentro da Regiao Critica */
     printf("  Thread %i: ... Regiao Critica ... \n",pID);
-
     /* Prepara-se para SAIR da Regiao Critica */
-    leave_region(pID);
+    leave_region( pID);
 
     /* Simula um Processamento qualquer */
     for( j=0; j<16384; j++ )
@@ -59,28 +59,25 @@ void pth( int pID ) //cria uma thread generica. Só precisa entrar com o numero 
 }
 
 
-
-
 /* ************************************************** Main Program */
 int main( int argc, char* argv[] )
 {
   pthread_t th0, th1;
-  int r_th0, r_th1;
-  int value0=0;
-  int value1=1;
-
+  void * r_th0;
+  void * r_th1;
   turn = 0;
+  
   flag[0] = flag[1] = FALSE;
 
   printf("Thread \"Main\": Algoritmo de \"Peterson\" \n");
   
-  if( pthread_create( &th0, NULL, (void *) pth, 0 ) != 0 ) {
+  if( pthread_create( &th0, NULL, pth,(void*) 0 ) != 0 ) {
     printf("Error \"pthread_create\" p/ Thread 0.\n");
     exit(1);
   }
 
 
-  if( pthread_create( &th1, NULL, (void *) pth, 1 ) != 0 ) {
+  if( pthread_create( &th1, NULL, pth,(void*) 1 ) != 0 ) {
     printf("Error \"pthread_create\" p/ Thread 1.\n");
     exit(1);
   }
@@ -89,19 +86,20 @@ int main( int argc, char* argv[] )
 
   printf("Thread \"Main\": Sincroniza termino com Threads 0 e 1.\n");
 
-if(pthread_join( th0, (void *) &r_th0 )) {
 
-fprintf(stderr, "Error joining thread\n");
-return 2;
+ if(pthread_join( th0, &r_th0 )) {
 
-}
+ 	fprintf(stderr, "Error joining thread\n");
+	return 2;
 
-if(  pthread_join( th1, (void *) &r_th1 )) {
+ }
 
-fprintf(stderr, "Error joining thread\n");
-return 2;
+ if(pthread_join( th1,  &r_th1 )) {
 
-}
+ 	fprintf(stderr, "Error joining thread\n");
+	return 2;
+
+ }
 
   printf("Thread \"Main\": Termina.\n");
   exit(0);
