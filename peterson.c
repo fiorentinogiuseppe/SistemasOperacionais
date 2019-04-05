@@ -29,7 +29,10 @@ void enter_region (int process){ //0 ou 1
 	/* Prepara-se para ENTRAR da Regiao Critica */
 	flag[process] = TRUE; //Interesse
 	turn = process; // troca o turn
-	while( flag[other]==TRUE & turn == process ) ; //comando nulo
+
+	while( flag[other]==TRUE & turn == process ) {
+		printf("  Thread %i: ... Ocupado, espere ... \n",process);
+	}
 }
 
 void leave_region(int process){ // quem estiver saindo
@@ -44,12 +47,14 @@ void pth( int pID ) //cria uma thread generica. Só precisa entrar com o numero 
   
   for( i=0; i<N; i++ ) {
     /* Prepara-se para ENTRAR da Regiao Critica */
+
     enter_region ( pID);
 
     /* Processo dentro da Regiao Critica */
-    printf("  Thread %i: ... Regiao Critica ... \n",pID);
+    printf("  Thread %i: ... Entrou na Regiao Critica ... \n",pID);
     /* Prepara-se para SAIR da Regiao Critica */
     leave_region( pID);
+    printf("  Thread %i: ... Saiu da Regiao Critica ... \n",pID);
 
     /* Simula um Processamento qualquer */
     for( j=0; j<16384; j++ )
