@@ -38,14 +38,13 @@ void leave_region(int process){ // quem estiver saindo
 }
 
 /* ************************************************** Thread */
-void *pth( void *arg ) //cria uma thread generica. Só precisa entrar com o numero da thread. 0 ou 1, por enquando tepois vai ate 5
+void pth( int pID ) //cria uma thread generica. Só precisa entrar com o numero da thread. 0 ou 1, por enquando tepois vai ate 5
 {
   int i, j, k;
-  int * pID = ((int *)arg);
-
+  
   for( i=0; i<N; i++ ) {
     /* Prepara-se para ENTRAR da Regiao Critica */
-    enter_region (pID);
+    enter_region ( pID);
 
     /* Processo dentro da Regiao Critica */
     printf("  Thread %i: ... Regiao Critica ... \n",pID);
@@ -71,13 +70,13 @@ int main( int argc, char* argv[] )
 
   printf("Thread \"Main\": Algoritmo de \"Peterson\" \n");
   
-  if( pthread_create( &th0, NULL, pth,(void*) 0 ) != 0 ) {
+  if( pthread_create( &th0, NULL, (void *) pth,(void *) 0 ) != 0 ) {
     printf("Error \"pthread_create\" p/ Thread 0.\n");
     exit(1);
   }
 
 
-  if( pthread_create( &th1, NULL, pth,(void*) 1 ) != 0 ) {
+  if( pthread_create( &th1, NULL, (void *) pth,(void *) 1 ) != 0 ) {
     printf("Error \"pthread_create\" p/ Thread 1.\n");
     exit(1);
   }
@@ -87,14 +86,14 @@ int main( int argc, char* argv[] )
   printf("Thread \"Main\": Sincroniza termino com Threads 0 e 1.\n");
 
 
- if(pthread_join( th0, &r_th0 )) {
+ if(pthread_join( th0, (void *) &r_th0 )) {
 
  	fprintf(stderr, "Error joining thread\n");
 	return 2;
 
  }
 
- if(pthread_join( th1,  &r_th1 )) {
+ if(pthread_join( th1, (void *) &r_th1 )) {
 
  	fprintf(stderr, "Error joining thread\n");
 	return 2;
