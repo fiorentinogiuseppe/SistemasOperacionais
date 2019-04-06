@@ -17,7 +17,7 @@
 struct node {
    int b; // burst time - Time required by a process for CPU execution.
    int p; // priority
-   int t; // tickets
+   int t[200]; // tickets
    int key; // list order
    int l; //lotery
    struct node *next;
@@ -86,6 +86,7 @@ int length() {
 
 //find a link with given key
 struct node* find(int key) {
+
 
    //start from the first link
    struct node* current = head;
@@ -234,44 +235,47 @@ void lotery() {
 		ptr->l = (ptr->b/quantum) + (taime-ptr->p);
 		for (int z=0;z<ptr->l;z++) 
 		{
-        	    ptr->t = p++;
-        	    m_ticket = p;
+			//printf("process %i: ticket%i\n",ptr->key,z);
+            	    	ptr->t[z] = p++;
+        	    //	ptr->t = p++;
+        	    	m_ticket = p;
         	}
 		ptr = ptr->next;
 	}
 }
 
 void winner(void){
-	struct node *ptr = head;
+	struct node *ptr;
 	int q;
 	struct node *qNode;
 	
 
 	while(taime!=tbt)
 	{
-	
+		ptr = head;
+		printf("\nKey: %i",ptr->key);
 		int winner = (rand()%m_ticket-1)+ 1;
 		while(ptr != NULL) {
 			for (int z=0;z<ptr->l;z++) 
 			{
-				if(ptr->t == winner)
+				if(ptr->t[z] == winner){//verificar se eh igual ou maior
 					q=ptr->key;
+				}
         		}
 			ptr = ptr->next;
 		}
+
 		        
 		printf("\n\n-------------------------------------\n");
-		printf("	<<<<   Winner: %d   >>>>	\n",winner);
+		printf("	<<<<   Winner: %d   >>>>	\n",q);
 		printf("-------------------------------------\n\n");
 		
-		printf("%i",q);
 		qNode=find(q);
 
-		if ((qNode->b) >0)  
+		if ((qNode->b) > 0)  
 		{
-		   qNode->b -= quantum;
-		
-			if ((qNode->b) >0) 
+		   	qNode->b -= quantum;
+			if ((qNode->b) > 0) 
 			{
 		    		taime+=quantum;
 			} 
@@ -280,19 +284,19 @@ void winner(void){
 		    		taime+=(qNode->b)+quantum;
 			}
 		
-			if((qNode->b)<0)
+			if((qNode->b) < 0)
 			{
 		        	qNode->b=0;
 			}		    
-			
-			pth(ptr->key);
-			printf("\n\t   (Total Time << Remaining Brust Time Of This Process << process ):  ( %d  <<  %d  <<  %c )\n",taime,qNode->b, qNode->p);
+			//pth(ptr->key);
+			printf("\n(Total Time << Remaining Brust Time Of This Process << process ):\n  ( %d  <<  %d  <<  %i )\n",taime,qNode->b, qNode->key);
 	       
 		}
-	    else
-	    {
-	    	printf("\n\t\t     >>>>>>Related Process With This Ticket Has Been Completed<<<<<<\n");
+	    	else
+	    	{
+	    		printf("\n\t\t     >>>>>>Related Process With This Ticket Has Been Completed<<<<<<\n");
 		}
+		//sleep(1);
 
 	}
 }
@@ -314,29 +318,33 @@ void creatList(void){
 	//List priority x burst
 	// priority 0 to 20
 	// burst sempre > 0
-	insertFirst(1,rand()%100,rand()%20);
-	insertFirst(2,rand()%100,rand()%20);
-	insertFirst(3,rand()%100,rand()%20);
-	insertFirst(4,rand()%100,rand()%20);
-	insertFirst(5,rand()%100,rand()%20);
-	insertFirst(6,rand()%100,rand()%20);
-	insertFirst(7,rand()%100,rand()%20);
-	insertFirst(8,rand()%100,rand()%20); 
-	insertFirst(9,rand()%100,rand()%20);
-	insertFirst(10,rand()%100,rand()%20);
+	insertFirst(1,rand()%100,rand()%10+1);
+	insertFirst(2,rand()%100,rand()%10+1);
+	insertFirst(3,rand()%100,rand()%10+1);
+	insertFirst(4,rand()%100,rand()%10+1);
+	insertFirst(5,rand()%100,rand()%10+1);
+	insertFirst(6,rand()%100,rand()%10+1);
+	insertFirst(7,rand()%100,rand()%10+1);
+	insertFirst(8,rand()%100,rand()%10+1); 
+	insertFirst(9,rand()%100,rand()%10+1);
+	insertFirst(10,rand()%100,rand()%10+1);
 
 }
+
+
 
 
 /* ************************************************** Main */
 int main (void) {
 	creatList();
 	taime= length()-1;
+	printList();
 	sort();
 	printList();
 	countTbT();
 	lotery();
 	printListTicket();
+	//sleep(1);
 	winner();	
 	
 	return 0;
