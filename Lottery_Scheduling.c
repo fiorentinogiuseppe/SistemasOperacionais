@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 #define totaltickets 10
 
 
@@ -204,7 +205,7 @@ void reverse(struct node** head_ref) {
 /* ************************************************** Thread */
 int tbt=0;
 int quantum=1;
-int size;
+int taime;
 int m_ticket=0;
 
 void pth( int pID ) //Simula um Processamento qualquer
@@ -229,9 +230,8 @@ void lotery() {
    	struct node *ptr = head;
 	//assign one or more lottery numbers to each process
 	int p=1;
-	printf("\n\n\nPriority  process  Brust  Lottery  Tickets");
 	while(ptr != NULL) {
-		ptr->l = (ptr->b/quantum) + (size-ptr->p);
+		ptr->l = (ptr->b/quantum) + (taime-ptr->p);
 		for (int z=0;z<ptr->l;z++) 
 		{
         	    ptr->t = p++;
@@ -240,52 +240,76 @@ void lotery() {
 		ptr = ptr->next;
 	}
 }
-/*
+
 void winner(void){
 	struct node *ptr = head;
-	while(time!=tbt)
+	int q;
+	struct node *qNode;
+	
+
+	while(taime!=tbt)
 	{
 	
 		int winner = (rand()%m_ticket-1)+ 1;
-		for(i =0;i<n;i++)
-		for(z=0;z<lottery[i];z++)
-		    if(ticket[i][z]==winner)
-		        q=i;
-		        
-	    printf("\n\n-------------------------------------");
-	    printf("<<<<   Winner: %d   >>>>",winner);
-	    printf("-------------------------------------\n");
-	
-		if ((brust[q]>0))  
-		{
-		brust[q]-=quantom;
-		
-		if (brust[q]>0) 
+		while(ptr != NULL) {
+			for (int z=0;z<ptr->l;z++) 
 			{
-		    time+=quantom;
-		} 
+				if(ptr->t == winner)
+					q=ptr->key;
+        		}
+			ptr = ptr->next;
+		}
+		        
+		printf("\n\n-------------------------------------\n");
+		printf("	<<<<   Winner: %d   >>>>	\n",winner);
+		printf("-------------------------------------\n\n");
+		
+		printf("%i",q);
+		qNode=find(q);
+
+		if ((qNode->b) >0)  
+		{
+		   qNode->b -= quantum;
+		
+			if ((qNode->b) >0) 
+			{
+		    		taime+=quantum;
+			} 
 			else 
 			{
-		    time+=(brust[q]+quantom);
-		}
+		    		taime+=(qNode->b)+quantum;
+			}
 		
-			if(brust[q]<0) 
+			if((qNode->b)<0)
 			{
-		        brust[q]=0;
-		}
-		    
-		pth(ptr->key);
-		    printf("\n\t   (Total Time << Remaining Brust Time Of This Process << process ):  ( %d  <<  %d  <<  %c )\n",time,brust[q],process[q]);
+		        	qNode->b=0;
+			}		    
+			
+			pth(ptr->key);
+			printf("\n\t   (Total Time << Remaining Brust Time Of This Process << process ):  ( %d  <<  %d  <<  %c )\n",taime,qNode->b, qNode->p);
 	       
 		}
 	    else
 	    {
 	    	printf("\n\t\t     >>>>>>Related Process With This Ticket Has Been Completed<<<<<<\n");
 		}
-    
+
 	}
 }
-*/
+
+//display the list
+void printListTicket() {
+   struct node *ptr = head;
+   printf("\n\n\nPriority  Process  Brust  Lottery  Tickets");
+
+   //start from the beginning
+   while(ptr != NULL) {
+      printf("\n  %d\t    %d\t    %d\t    %d \t    %d\t",ptr->p, ptr->key, ptr->b,ptr->l,ptr->t);
+      ptr = ptr->next;
+   }
+
+}
+
 void creatList(void){
 	//List priority x burst
 	// priority 0 to 20
@@ -307,12 +331,13 @@ void creatList(void){
 /* ************************************************** Main */
 int main (void) {
 	creatList();
-	size= length()-1;
-//	sort();
-//	printList();
-//	countTbT();
-//	lotery();
-//	winner();	
+	taime= length()-1;
+	sort();
+	printList();
+	countTbT();
+	lotery();
+	printListTicket();
+	winner();	
 	
 	return 0;
 
