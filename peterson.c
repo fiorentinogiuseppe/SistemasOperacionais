@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <unistd.h> 
 #include <time.h>
-
+// RODAR SINGLE CORE taskset -c 0 ./peterson
 
 
 /* ************************************************** Defines */
@@ -22,7 +22,7 @@ int compart;//variavel compartilhada
 /* ************************************************** Peterson Algorithm */
 
 // Executed before entering critical section 
-void enter_region (int process){ //0 ou 1
+void enter_region (int process){
 	//int other; //outro processo
 
 	// give the other thread the chance to acquire lock 
@@ -30,11 +30,28 @@ void enter_region (int process){ //0 ou 1
 
 	/* Prepara-se para ENTRAR da Regiao Critica */
 	flag[process] = TRUE; // Set TRUE saying you want to acquire lock 
-	turn = 1-process; // troca o turn
-
+	
+	// Memory fence to prevent the reordering 
+	// of instructions beyond this barrier. 
+	 __sync_synchronize(); 
+	turn = process; // troca o turn
 	// Wait until the other thread looses the desire 
 	// to acquire lock or it is your turn to get the lock. 
-	while( flag[1-process]==TRUE & turn ==(1-process));
+	int exit_sgn=TRUE;
+	
+//https://stackoverflow.com/questions/26570013/trying-to-understand-3-thread-petersons-algorithm
+
+	while(exit_sgn){
+		for(int i=0;i<N;i++){
+			if(flag[i] == TRUE && turn == i)
+				exit_sgn=FALSE;
+			else
+				exit_sgn=TRUE;
+		}
+	};
+        
+	// Yield to avoid wastage of resources. 
+        sched_yield(); 
 }
 
 // Executed after leaving critical section 
@@ -43,6 +60,7 @@ void leave_region(int process){ // quem estiver saindo
 	// You do not desire to acquire lock in future. 
 	// This will allow the other thread to acquire 
 	// the lock. 
+	printf("  Thread %i: ... Saindo da Regiao Critica ... \n",process);
 	flag[process]=FALSE;
 }
 
@@ -59,9 +77,8 @@ void pth( int pID ){ //cria uma thread generica.
     	// can enter here at a time) 
 	compart=pID;
 	printf("  Compart: %i\n",compart);	
-	sleep(10); 
+	sleep(5); 
 	/* Prepara-se para SAIR da Regiao Critica */
-	printf("  Thread %i: ... Saindo da Regiao Critica ... \n",pID);
 	leave_region( pID);
 
 }
@@ -82,7 +99,7 @@ int main( int argc, char* argv[] )
   // both the threads to acquire the locks. 
   // And, giving turn to one of them. 
 	turn = 0;
- 	flag[0] = flag[1] = flag[2] = flag[3] = flag[4] = FALSE;
+	for(int i=0; i<N;i++) flag[0] = FALSE;
 
 /* ************************************************** 5 Proccess */
 	printf("Thread \"Main\": Algoritmo de \"Peterson\" \n");
