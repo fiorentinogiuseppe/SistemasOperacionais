@@ -33,7 +33,7 @@ void enter_region (int process){
 	
 	// Memory fence to prevent the reordering 
 	// of instructions beyond this barrier. 
-	 __sync_synchronize(); 
+	//__sync_synchronize(); 
 	turn = process; // troca o turn
 	// Wait until the other thread looses the desire 
 	// to acquire lock or it is your turn to get the lock. 
@@ -42,9 +42,14 @@ void enter_region (int process){
 //https://stackoverflow.com/questions/26570013/trying-to-understand-3-thread-petersons-algorithm
 
 	while(exit_sgn){
+		printf("  Ocupado...Espere\n");
 		for(int i=0;i<N;i++){
-			if(flag[i] == TRUE && turn == i)
+			//printf("flag %i = %i && turn = %i\n",i,flag[i],i);
+			//sleep(2);
+			if(flag[i] == TRUE && turn == i){
 				exit_sgn=FALSE;
+				break;
+			}
 			else
 				exit_sgn=TRUE;
 		}
@@ -68,6 +73,7 @@ void leave_region(int process){ // quem estiver saindo
 void pth( int pID ){ //cria uma thread generica.
 	int i, j, k;
 	/* Prepara-se para ENTRAR da Regiao Critica */
+	//printf("  Thread %i: ... Entrando na Regiao Critica ... \n",pID);
 	enter_region(pID);
 
 	/* Processo dentro da Regiao Critica */
@@ -78,9 +84,9 @@ void pth( int pID ){ //cria uma thread generica.
 	compart=pID;
 	printf("  Compart: %i\n",compart);	
 	sleep(5); 
+
 	/* Prepara-se para SAIR da Regiao Critica */
 	leave_region( pID);
-
 }
 
 
@@ -88,11 +94,6 @@ void pth( int pID ){ //cria uma thread generica.
 int main( int argc, char* argv[] )
 {
 	pthread_t th0, th1, th2, th3,th4;
-	void * r_th0;
-	void * r_th1;
-	void * r_th2;
-	void * r_th3;
-	void * r_th4;
 
 /* ************************************************** Lock Init */
   // Initialize lock by reseting the desire of 
