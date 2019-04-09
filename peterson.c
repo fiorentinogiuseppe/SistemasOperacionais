@@ -6,76 +6,58 @@
 #include <pthread.h>
 #include <unistd.h> 
 #include <time.h>
+#include<stdbool.h>
 // RODAR SINGLE CORE taskset -c 0 ./peterson
 
 
 /* ************************************************** Defines */
 #define TRUE 1
-#define FALSE 0 
+#define FALSE -1 
 #define N 5
 
 
 /* ************************************************** Global Varialbles */
 int flag[N]; // interesse
-int turn; //vez
+int turn[N]; //vez
 int compart;//variavel compartilhada
 
 /* ************************************************** Peterson Algorithm */
+//https://stackoverflow.com/questions/26701942/trying-to-understand-the-petersons-n-process-algorithm
+//https://www.cs.rice.edu/~vs3/comp422/lecture-notes/comp422-lec19-s08-v1.pdf
 
 // Executed before entering critical section 
+// that position 0 is the tail (back) of the queue, position N-1 is the head (front) of the queue, position N-2 is second from the front, etc... , and position -1 means you're not in the queue at all 
+
+//Filter lock: direct generalization of Peterson’s lock
+
+bool sameOrHigher(int i, int j) { 
+	for(int k = 0; k < N; k++) 
+		if (k != i && flag[k] >= j) 
+			return true; 
+	return false;
+}
 void enter_region (int process){
 	printf("  Thread %i: ... Entrando na Regiao Critica ... \n",process);
-	//int other; //outro processo
-
-	// give the other thread the chance to acquire lock 
-	//other= 1-process; 
-
-	/* Prepara-se para ENTRAR da Regiao Critica */
-	flag[process] = TRUE; // Set TRUE saying you want to acquire lock 
 	
-	// Memory fence to prevent the reordering 
-	// of instructions beyond this barrier. 
-	//__sync_synchronize(); 
-	turn = process+1; // troca o turn
-	// Wait until the other thread looses the desire 
-	// to acquire lock or it is your turn to get the lock. 
-	int exit_sgn=TRUE;
-	
-//https://stackoverflow.com/questions/26570013/trying-to-understand-3-thread-petersons-algorithm
-	while(flag[process+1] == TRUE && turn == process){
-	
+	for (int count = 1; count < N; count++) {
+		flag[process] = count;                 // I think I'm in position "count" in the queue
+		turn[count] = process;                  // and I'm the most recent process to think I'm in position "count"
+		while (sameOrHigher(process,count) && turn[count] == process);
+		
+                                      // now I can update my estimated position to "count"+1 
 
-	}
-
-	/*while(exit_sgn){
-		for(int i=0;i<N;i++){
-			printf("flag %i = %i && turn = %i\n",i,flag[i],i);
-			
-			if(flag[i] == TRUE && turn == i){
-				printf("\n%i-%i\n",flag[i],i); 
-				exit_sgn=FALSE;
-				break;
-			}
-			else
-				exit_sgn=TRUE;
-		}
-		if(exit_sgn!=FALSE) printf("  Ocupado...Espere\n");
-		else printf("prox");
-		//sleep(2);
-	};*/
-        
-	// Yield to avoid wastage of resources. 
-        //sched_yield(); 
+	}                                    // now I'm at the head of the queue so I can start my critical section          
+	sleep(2);
 }
+
+
 
 // Executed after leaving critical section 
 void leave_region(int process){ // quem estiver saindo
-	/* Prepara-se para SAIR da Regiao Critica */
-	// You do not desire to acquire lock in future. 
-	// This will allow the other thread to acquire 
-	// the lock. 
+	
 	printf("  Thread %i: ... Saindo da Regiao Critica ... \n",process);
 	flag[process]=FALSE;
+
 }
 
 /* ************************************************** Thread */
@@ -92,11 +74,10 @@ void pth( int pID ){ //cria uma thread generica.
     	// can enter here at a time) 
 	compart=pID;
 	printf("  Compart: %i\n",compart);
-	printf("  Thread %i: ... Saindo da Regiao Critica ... \n",pID);	
-	sleep(5); 
 	
 	/* Prepara-se para SAIR da Regiao Critica */
 	leave_region( pID);
+	printf("  Thread %i: ... Saiu da Regiao Critica ... \n",pID);
 }
 
 
@@ -109,8 +90,11 @@ int main( int argc, char* argv[] )
   // Initialize lock by reseting the desire of 
   // both the threads to acquire the locks. 
   // And, giving turn to one of them. 
-	turn = 0;
-	for(int i=0; i<N;i++) flag[0] = FALSE;
+
+	for(int i=0; i<N;i++) {
+		flag[0] = FALSE;
+		turn[0] = FALSE;
+	}
 
 /* ************************************************** 5 Proccess */
 	printf("Thread \"Main\": Algoritmo de \"Peterson\" \n");
