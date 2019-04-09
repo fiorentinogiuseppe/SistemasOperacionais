@@ -1,3 +1,4 @@
+
 /* ************************************************** Includes */
 #include <stdio.h>
 #include <sys/wait.h>
@@ -23,6 +24,7 @@ int compart;//variavel compartilhada
 
 // Executed before entering critical section 
 void enter_region (int process){
+	printf("  Thread %i: ... Entrando na Regiao Critica ... \n",process);
 	//int other; //outro processo
 
 	// give the other thread the chance to acquire lock 
@@ -34,29 +36,36 @@ void enter_region (int process){
 	// Memory fence to prevent the reordering 
 	// of instructions beyond this barrier. 
 	//__sync_synchronize(); 
-	turn = process; // troca o turn
+	turn = process+1; // troca o turn
 	// Wait until the other thread looses the desire 
 	// to acquire lock or it is your turn to get the lock. 
 	int exit_sgn=TRUE;
 	
 //https://stackoverflow.com/questions/26570013/trying-to-understand-3-thread-petersons-algorithm
+	while(flag[process+1] == TRUE && turn == process){
+	
 
-	while(exit_sgn){
-		printf("  Ocupado...Espere\n");
+	}
+
+	/*while(exit_sgn){
 		for(int i=0;i<N;i++){
-			//printf("flag %i = %i && turn = %i\n",i,flag[i],i);
-			//sleep(2);
+			printf("flag %i = %i && turn = %i\n",i,flag[i],i);
+			
 			if(flag[i] == TRUE && turn == i){
+				printf("\n%i-%i\n",flag[i],i); 
 				exit_sgn=FALSE;
 				break;
 			}
 			else
 				exit_sgn=TRUE;
 		}
-	};
+		if(exit_sgn!=FALSE) printf("  Ocupado...Espere\n");
+		else printf("prox");
+		//sleep(2);
+	};*/
         
 	// Yield to avoid wastage of resources. 
-        sched_yield(); 
+        //sched_yield(); 
 }
 
 // Executed after leaving critical section 
@@ -82,9 +91,10 @@ void pth( int pID ){ //cria uma thread generica.
 	// Critical section (Only one thread 
     	// can enter here at a time) 
 	compart=pID;
-	printf("  Compart: %i\n",compart);	
+	printf("  Compart: %i\n",compart);
+	printf("  Thread %i: ... Saindo da Regiao Critica ... \n",pID);	
 	sleep(5); 
-
+	
 	/* Prepara-se para SAIR da Regiao Critica */
 	leave_region( pID);
 }
