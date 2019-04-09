@@ -6,47 +6,46 @@
 #include <pthread.h>
 #include <unistd.h> 
 #include <time.h>
-#include<stdbool.h>
+
 // RODAR SINGLE CORE taskset -c 0 ./peterson
 
 
 /* ************************************************** Defines */
 #define TRUE 1
-#define FALSE -1 
+#define FALSE 0 
 #define N 5
 
 
 /* ************************************************** Global Varialbles */
-int flag[N]; // interesse
-int turn[N]; //vez
+int level[N]; // interesse
+int victim[N]; //vez
 int compart;//variavel compartilhada
 
 /* ************************************************** Peterson Algorithm */
-//https://stackoverflow.com/questions/26701942/trying-to-understand-the-petersons-n-process-algorithm
-//https://www.cs.rice.edu/~vs3/comp422/lecture-notes/comp422-lec19-s08-v1.pdf
+//http://pages.cpsc.ucalgary.ca/~higham/Teaching/distributedComputingPapers/herlihy_ch2_ME.pdf
+// 3.4 The Filter Lock pag 10
+//Maurice Herlihy and Nir Shavit. “Multiprocessor
+//Synchronization and Concurrent Data Structures.” Chapter 3
+//“Mutual Exclusion.” Draft manuscript, 2005.
 
-// Executed before entering critical section 
-// that position 0 is the tail (back) of the queue, position N-1 is the head (front) of the queue, position N-2 is second from the front, etc... , and position -1 means you're not in the queue at all 
+//Verifica se tem thread no msm nivel ou maior
+int maior(int a, int b) { 
+	for(int i = 0; i < N; i++) 
+		if (i != a && level[i] >= b) 
+			return TRUE; 
+	return FALSE;
+}
 
 //Filter lock: direct generalization of Peterson’s lock
-
-bool sameOrHigher(int i, int j) { 
-	for(int k = 0; k < N; k++) 
-		if (k != i && flag[k] >= j) 
-			return true; 
-	return false;
-}
 void enter_region (int process){
 	printf("  Thread %i: ... Entrando na Regiao Critica ... \n",process);
-	
+	//Percorrer todos os processos
 	for (int count = 1; count < N; count++) {
-		flag[process] = count;                 // I think I'm in position "count" in the queue
-		turn[count] = process;                  // and I'm the most recent process to think I'm in position "count"
-		while (sameOrHigher(process,count) && turn[count] == process);
-		
-                                      // now I can update my estimated position to "count"+1 
-
-	}                                    // now I'm at the head of the queue so I can start my critical section          
+		level[process] = count;                 
+		victim[count] = process;      
+		//aguarda conflitos            
+		while (maior(process,count) && victim[count] == process);           
+	}                                  
 	sleep(2);
 }
 
@@ -56,7 +55,7 @@ void enter_region (int process){
 void leave_region(int process){ // quem estiver saindo
 	
 	printf("  Thread %i: ... Saindo da Regiao Critica ... \n",process);
-	flag[process]=FALSE;
+	level[process]=FALSE;
 
 }
 
@@ -89,11 +88,11 @@ int main( int argc, char* argv[] )
 /* ************************************************** Lock Init */
   // Initialize lock by reseting the desire of 
   // both the threads to acquire the locks. 
-  // And, giving turn to one of them. 
+  // And, giving victim to one of them. 
 
 	for(int i=0; i<N;i++) {
-		flag[0] = FALSE;
-		turn[0] = FALSE;
+		level[0] = FALSE;
+		victim[0] = FALSE;
 	}
 
 /* ************************************************** 5 Proccess */
