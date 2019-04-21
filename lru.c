@@ -46,7 +46,6 @@ QNode* newQNode( unsigned pageNumber )
 	temp->pageNumber = pageNumber; //numero da pagina
   
 	// Initialize prev and next as NULL 
-	printf("\nCaso tenha erro verificar aq\n");
 	//No criado sem estar anexado a ninguem
 	temp->next = NULL;
 	temp->prev = temp->next; 
@@ -61,8 +60,10 @@ Queue* createQueue( int numberOfFrames )
 	//Aloca memoria para criar a fila
 	Queue* queue = (Queue *)malloc( sizeof( Queue ) ); 
   
-	// A fila eh criada vazia
+	// A fila eh criada vazia sem miss e hit
 	queue->count = 0; 
+	queue->hit = 0; 
+	queue->miss = 0; 
 	queue->front = queue->rear = NULL; 
   
 	// Numero total de frames por paginas
@@ -159,6 +160,112 @@ void Enqueue( Queue* queue, Hash* hash, unsigned pageNumber )
     // Adicionou mais um? Aumenta a conta
     queue->count++; 
 } 
+
+void printQueue(Queue* q) {
+	struct QNode*ptr = q->front;
+	//start from the beginning
+	while(ptr != NULL) {
+		printf("|%d|",ptr->pageNumber);
+		ptr = ptr->next;
+		if(ptr!= NULL) printf("<==");
+	}
+	printf("\n");
+	
+}
   
 
 /**Fim das funções utilitarias**/
+
+/**Funcoes para o LRU**/
+
+// Se Frame não está lá na memória, trazemos na memória e adicionamos na frente da fila - miss
+// O frame está lá na memória, nós movemos o frame para frente da fila - hit
+// Sempre movos para o inicio da fila, assim temos que desvincular este no da sua posição para movermos para o inicio da fila
+
+void ReferencePage( Queue* queue, Hash* hash, unsigned pageNumber ) 
+{ 
+	//Cria um noh para repersentar a pagina requisitada
+	QNode* reqPage = hash->array[ pageNumber ]; 
+  
+	// Miss, pois a page nao esta e ele vai buscar	
+	if ( reqPage == NULL ){ 
+		//Teve um miss na queue
+		queue->miss++;
+		//Vai colocar na fila, mas usa os algoritmos para verificar que esta cheio ou nao, como já foi explicado
+	        Enqueue( queue, hash, pageNumber );
+	} 
+  	//Hit
+	else if (reqPage != queue->front) 
+	{ 
+		//Teve um hit na queue
+		queue->hit++;
+
+		//Desvincular a página solicitada de sua localização atual na fila.
+		//Nesses dois comandos ele apenas tira da fila o noh requisitado
+		reqPage->prev->next = reqPage->next; 
+		if (reqPage->next) 
+		reqPage->next->prev = reqPage->prev; 
+  
+
+		// Caso esse no seja o ultimo vai para o inicio
+		if (reqPage == queue->rear) 
+		{ 
+			queue->rear = reqPage->prev; 
+			queue->rear->next = NULL; 
+		} 
+  
+		// Colocando o no no inicio do noh inicial 
+		reqPage->next = queue->front; 
+		reqPage->prev = NULL; 
+	  
+		// Faz com que o antigo primeiro agr aponte para o novo primeiro 
+		reqPage->next->prev = reqPage; 
+	  
+		// modifica a front para a pagina requisitada
+		queue->front = reqPage; 
+
+    	} 
+} 
+
+/**Fim das funcoes para trabalhar com LRU**/
+//When a page is referenced, the required page may be in the memory. If it is in the memory, we need to detach the node of the list and bring it to
+//the front of the queue.
+//If the required page is not in the memory, we bring that in memory. In simple words, we add a new node to the front of the queue and update the
+//corresponding node address in the hash. If the queue is full, i.e. all the frames are full, we remove a node from the rear of queue, and add the new
+//node to the front of queue.
+  
+/**Funcao main onde sera chamado tudo**/
+int main() 
+{ 
+
+
+	// Cache com 4 pages 
+	Queue* q = createQueue( 3 ); 
+  
+	// 10 paginas diferentes que podem ser referenciadas
+	Hash* hash = createHash( 10 ); 
+	
+
+	// Sequencia de paginas 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5
+
+	ReferencePage( q, hash, 1); 
+	ReferencePage( q, hash, 2); 
+	ReferencePage( q, hash, 3); 
+	ReferencePage( q, hash, 4); 
+	ReferencePage( q, hash, 1); 
+	ReferencePage( q, hash, 2); 
+	ReferencePage( q, hash, 5); 
+	ReferencePage( q, hash, 1); 
+	ReferencePage( q, hash, 2); 
+	ReferencePage( q, hash, 3); 
+	ReferencePage( q, hash, 4); 
+	ReferencePage( q, hash, 5); 
+	
+
+	// So os prints 
+	printQueue(q);
+	printf("Total de hits : %d\n", q->hit);
+	printf("Total de miss : %d\n", q->miss);
+	
+	return 0; 
+} 
