@@ -47,30 +47,35 @@ void worstFit(int* tamBlock, int nblock, int* tamProc, int nArq ){
 	printf("\n\n>>>>>>>>>>RODANDO<<<<<<<<<<\n\n");
 	//Pega cada professo e encontra um bloco para ele
 	//De acordo com o seu tamanho
+	int n = 0; //variavel so par ajudar na hora de printar ja q não foi usado processo 0-(n-1) sim 1-n
         for(int i=0; i<nArq;i++){
-		printf("\n\nProcess No.  %d \t\t \n", i+1);
-		printf("Encontrando melhor bloco...\n");
+		int n=i+1;
+		printf("\n\nProcess No.  %d \t\t \n", n);
 		//O index do melhor bloco do processo atual
 		int wstId = -1;
+		//encontra o real posicionamento do  
                 for(int j=0; j<nblock; j++){
+			printf("\nEncontrando melhor bloco para o Process No. %d... \t\t\n", n);
+			//vai encontrando o posicionamento
 			printf("Block no.  %d \t\t \n",j);
 			if(tamBlock[j] >= tamProc[i] ){
-				printf("Process No. %d = %d cabe no Block No. %d = %d\n",i,tamProc[i],j,tamBlock[j] );
+				printf("Process No. %d = %d cabe no Block No. %d = %d\n",n,tamProc[i],j,tamBlock[j] );
 				//Se o index for -1 não tem ninguem é so alterar
 				if(wstId == -1) {
-					printf("Block No. %d = %d Vazio... Alocando Process No. %d = %d... \n",j,tamBlock[j],i,tamProc[i]);
+					printf("Block No. %d = %d Vazio... Alocando Process No. %d = %d... \n",j,tamBlock[j],n,tamProc[i]);
 					wstId = j;
 				}
-				//Se o index for diferente de -1 tem alguem lá caso o tamanho seja menor aloca lá caso contrario não é possivel alocar
+				//Foi salvo o idx do maior block anterior mente, porém é verificado se esse local realmente é o maior
+				//Coso não for é substituido o wsId pelo maior caso contrario, como entrou no else if não possui espaço pra ele 
 				else if (tamBlock[wstId] < tamBlock[j]){
-					printf("Bloco No. %d = %d alocado, porem possui espaco para o Process No. %d = %d...\n",j,tamBlock[j],i,tamProc[i]);
+					printf("Bloco No. %d = %d alocado, porem possui espaco para o Process No. %d = %d...\n",j,tamBlock[j],n,tamProc[i]);
 					wstId = j;
 				}
 				else
 					printf("Bloco No. %d = %d já alocado e nao possui espaco para o Process No. %d = %d...\n",j,tamBlock[j],i,tamProc[i]);
                         }
 			else{
-				printf("Process No. %d = %d nao cabe no Block No. %d = %d\n",i,tamProc[i],j,tamBlock[j] );
+				printf("Process No. %d = %d nao cabe no Block No. %d = %d\n",n,tamProc[i],j,tamBlock[j] );
 			}
                 }
 
@@ -78,9 +83,14 @@ void worstFit(int* tamBlock, int nblock, int* tamProc, int nArq ){
 		if(wstId != -1){
 			//Alocamos o bloco j para o processo p[i]
 			alloc[i] = wstId;
-			
 			//Diminui o tamanho  dql bloco
 			tamBlock[wstId] -= tamProc[i];
+			printf("\n\n\nEncontrado o Bloco No. %d para o Process No. %d = %d\t\t\n", wstId,n,tamProc[i]);
+			printf("Tamanho do Bloco No. %d atual eh: %d\n", wstId,tamBlock[wstId]);
+		}
+		else {
+			printf("\n\n\nNao encontrado um bloco para o Process No. %d = %d\t\t\n", n,tamProc[i]);
+			printf("Tamanho do Bloco No. %d atual eh: %d\n", wstId,tamBlock[wstId]);
 		}
         }
 	printf("\n\n>>>>>>>>>>FIM<<<<<<<<<<\n\n");
