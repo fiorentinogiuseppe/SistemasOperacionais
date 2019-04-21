@@ -118,6 +118,12 @@ void deQueue( Queue* queue )
 	queue->count--; 
 } 
 
+// Verifica se o frame esta cheio para remover o rabo
+int AreAllFramesFull( Queue* queue ) 
+{ 
+    return queue->count == queue->numberOfFrames; 
+} 
+  
 
 // Adicionar um novo elemento a fila
 void Enqueue( Queue* queue, Hash* hash, unsigned pageNumber ) 
@@ -137,9 +143,10 @@ void Enqueue( Queue* queue, Hash* hash, unsigned pageNumber )
    
 	// Fila vazia
 	//o rabo e o inicio ambos estao apontando para um mesmo local
-	if ( isQueueEmpty( queue ) ) 
+	if ( isQueueEmpty( queue ) ){ 
 		queue->front = temp; 
 		queue->rear = queue->front;
+	}
 	else  // Caso a fila nao esteja vazia eh só adicionar no incio e teoricamente dar um shift em todos os restos
 	{ 
 		queue->front->prev = temp; 
@@ -152,3 +159,6 @@ void Enqueue( Queue* queue, Hash* hash, unsigned pageNumber )
     // Adicionou mais um? Aumenta a conta
     queue->count++; 
 } 
+  
+
+/**Fim das funções utilitarias**/
