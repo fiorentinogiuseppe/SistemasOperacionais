@@ -57,6 +57,7 @@ QNode* newQNode( unsigned pageNumber )
 //Cria a fila e retorna ela
 Queue* createQueue( int numberOfFrames ) 
 { 
+	printf("CRIANDO PAGINACAO FISICA...\n");
 	//Aloca memoria para criar a fila
 	Queue* queue = (Queue *)malloc( sizeof( Queue ) ); 
   
@@ -68,13 +69,14 @@ Queue* createQueue( int numberOfFrames )
   
 	// Numero total de frames por paginas
 	queue->numberOfFrames = numberOfFrames; 
-  
+  	printf("PAGINACAO CRIADA...\n\n\n");
     	return queue; 
 } 
 
 //Cria a hash e retorna ela
 Hash* createHash( int capacity ) 
 { 
+	printf("CRIANDO PAGINACAO VIRTUAL...\n");
 	// Aloca memoria para a hash
 	Hash* hash = (Hash *) malloc( sizeof( Hash ) ); 
 	//Tamanho total da hash ou seja o total de paginas
@@ -85,8 +87,24 @@ Hash* createHash( int capacity )
   
 	// Inicializa a hash vazia
 	for( int i = 0; i < hash->capacity; ++i ) hash->array[i] = NULL;   
+	printf("PAGINACAO CRIADA...\n\n\n");
 	return hash; 
-} 
+}
+
+//print da fila
+void printQueue(Queue* q) {
+	struct QNode*ptr = q->front;
+	//start from the beginning
+	if(ptr == NULL) printf("FILA VAZIA..");
+	while(ptr != NULL) {
+		printf("|%d|",ptr->pageNumber);
+		ptr = ptr->next;
+		if(ptr!= NULL) printf("<==");
+	}
+	printf("\n");
+	
+}
+
 
 //Verifica se a fila esta vazia
 int isQueueEmpty( Queue* queue ) 
@@ -129,13 +147,17 @@ int AreAllFramesFull( Queue* queue )
 // Adicionar um novo elemento a fila
 void Enqueue( Queue* queue, Hash* hash, unsigned pageNumber ) 
 { 
+	printf("\n\n\nAdicionando novo elemento,%d, na memoria fisica...\n",pageNumber);
+	printQueue(queue);
 	//Fila cheia
 	// Fila cheia remove o "rabo"
 	if ( AreAllFramesFull ( queue ) ) 
 	{ 
+		printf("Fila cheia... Removendo o ultimo elemento: %d\n", queue->rear->pageNumber);
 		// remove page from hash 
 		hash->array[ queue->rear->pageNumber ] = NULL; 
 		deQueue( queue ); 
+		printQueue(queue);
 	} 
 	  
 	// Cria um novo no para adicionar na frente  
@@ -144,35 +166,28 @@ void Enqueue( Queue* queue, Hash* hash, unsigned pageNumber )
    
 	// Fila vazia
 	//o rabo e o inicio ambos estao apontando para um mesmo local
-	if ( isQueueEmpty( queue ) ){ 
+	if ( isQueueEmpty( queue ) ){
+		printf("Fila vazia...\n"); 
 		queue->front = temp; 
 		queue->rear = queue->front;
+		printQueue(queue);
 	}
 	else  // Caso a fila nao esteja vazia eh só adicionar no incio e teoricamente dar um shift em todos os restos
 	{ 
+		printf("Adicionando novo elemento, %d, no inicio da fila\n",pageNumber);
 		queue->front->prev = temp; 
 		queue->front = temp; 
+		printQueue(queue);
 	} 
   
-    // Adicionar a nova entrada ao hash
-    hash->array[ pageNumber ] = temp; 
-  
-    // Adicionou mais um? Aumenta a conta
-    queue->count++; 
+	// Adicionar a nova entrada ao hash
+	printf("Adicionando valor, %d, na memoria virtual...\n", temp->pageNumber);
+	hash->array[ pageNumber ] = temp; 
+
+  	// Adicionou mais um? Aumenta a conta
+	queue->count++; 
 } 
 
-void printQueue(Queue* q) {
-	struct QNode*ptr = q->front;
-	//start from the beginning
-	while(ptr != NULL) {
-		printf("|%d|",ptr->pageNumber);
-		ptr = ptr->next;
-		if(ptr!= NULL) printf("<==");
-	}
-	printf("\n");
-	
-}
-  
 
 /**Fim das funções utilitarias**/
 
@@ -184,12 +199,14 @@ void printQueue(Queue* q) {
 
 void ReferencePage( Queue* queue, Hash* hash, unsigned pageNumber ) 
 { 
+	printf("\n\nNova pagina de no. %d requisitada...\n",pageNumber);
 	//Cria um noh para repersentar a pagina requisitada
 	QNode* reqPage = hash->array[ pageNumber ]; 
   
 	// Miss, pois a page nao esta e ele vai buscar	
 	if ( reqPage == NULL ){ 
 		//Teve um miss na queue
+		printf("Miss da pagina %d\n", pageNumber);
 		queue->miss++;
 		//Vai colocar na fila, mas usa os algoritmos para verificar que esta cheio ou nao, como já foi explicado
 	        Enqueue( queue, hash, pageNumber );
@@ -198,20 +215,31 @@ void ReferencePage( Queue* queue, Hash* hash, unsigned pageNumber )
 	else if (reqPage != queue->front) 
 	{ 
 		//Teve um hit na queue
+		printf("HIT da pagina %d\n", pageNumber);
 		queue->hit++;
 
 		//Desvincular a página solicitada de sua localização atual na fila.
 		//Nesses dois comandos ele apenas tira da fila o noh requisitado
+		printf("Fila antes...\n");
+		printQueue(queue);
+		printf("Removenda a pagina %d da posicao atual q eh entre: %d",pageNumber,reqPage->prev->pageNumber);
 		reqPage->prev->next = reqPage->next; 
-		if (reqPage->next) 
-		reqPage->next->prev = reqPage->prev; 
+		if (reqPage->next) {
+			printf(" e %d\n",reqPage->next->pageNumber);
+			reqPage->next->prev = reqPage->prev; 
+		}
+		else{
+			printf(" e NULL\n");
+		}
+		printQueue(queue);
   
-
+		printf("Colocando a pagina %d no inicio...\n",pageNumber);
 		// Caso esse no seja o ultimo vai para o inicio
 		if (reqPage == queue->rear) 
 		{ 
 			queue->rear = reqPage->prev; 
 			queue->rear->next = NULL; 
+
 		} 
   
 		// Colocando o no no inicio do noh inicial 
@@ -223,6 +251,9 @@ void ReferencePage( Queue* queue, Hash* hash, unsigned pageNumber )
 	  
 		// modifica a front para a pagina requisitada
 		queue->front = reqPage; 
+
+		printf("Pagina %d agora no inicio...\n",pageNumber);
+		printQueue(queue);
 
     	} 
 } 
@@ -239,30 +270,41 @@ int main()
 { 
 
 
-	// Cache com 4 pages 
-	Queue* q = createQueue( 3 ); 
+	// Memoria fisica com 8 paginas 
+	//frame = block of consecutive physical memory
+	Queue* q = createQueue( 8 ); 
   
-	// 10 paginas diferentes que podem ser referenciadas
-	Hash* hash = createHash( 10 ); 
+	// Memoria virtual com 16 paginas ( 0 a 9)
+	//page = block of consecutive virtual memory
+	Hash* hash = createHash( 16 ); 
 	
 
-	// Sequencia de paginas 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5
+	// Sequencia de pages 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5
 
+	//p1
 	ReferencePage( q, hash, 1); 
 	ReferencePage( q, hash, 2); 
-	ReferencePage( q, hash, 3); 
 	ReferencePage( q, hash, 4); 
+	ReferencePage( q, hash, 3); 
+	//p2
 	ReferencePage( q, hash, 1); 
 	ReferencePage( q, hash, 2); 
 	ReferencePage( q, hash, 5); 
-	ReferencePage( q, hash, 1); 
+	ReferencePage( q, hash, 6); 
+	//p3
 	ReferencePage( q, hash, 2); 
-	ReferencePage( q, hash, 3); 
+	ReferencePage( q, hash, 9); 
 	ReferencePage( q, hash, 4); 
 	ReferencePage( q, hash, 5); 
+	//p4
+	ReferencePage( q, hash, 8); 
+	ReferencePage( q, hash, 7); 
+	ReferencePage( q, hash, 8); 
+	ReferencePage( q, hash, 9); 
 	
 
 	// So os prints 
+	printf("\n\n\nFINALMENTE TEMOS...\n");
 	printQueue(q);
 	printf("Total de hits : %d\n", q->hit);
 	printf("Total de miss : %d\n", q->miss);
