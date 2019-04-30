@@ -1,3 +1,4 @@
+#include<unistd.h> 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -221,33 +222,65 @@ void print_memory() {
   } while((index = index->next) != head);
   printf("}\n");
 }
+int somatorio(int  arr[], int n){
+	int sum=0;
+	for (int i = 0; i < n; i++)
+	 {
+	    sum = sum + arr[i];
+	 }
+	return sum;
+}
 
 void mymem() {
-  void *a, *b, *c, *d, *e;
+	void *a;
+	void *arr[5]; //array de ponteiros des elementos
+	for (int i = 0; i < 5; i++) {
+	    arr[i] = a;
+	}
+	int pF, vF; //variaveis aleatorias para acessar o array
+	int tam;
+	int candidatos[] ={100,200,300,400,500,600};
+	int numCandidatos=6;
+	int cont=0; //contador
+	int memRemain=0, memInit; //quanto de memoria ainda tem q usar usar 
+	memRemain= somatorio(candidatos,numCandidatos);
+	memInit=memRemain;
 	tamMem=520;
-  startUpMem(tamMem);
-	print_memory();
-  a = alloc(100);
-	print_memory();
-  b = alloc(200);
-	print_memory();
-  c = alloc(300);
-	print_memory();
-	printf("Livrando..\n");
-  letfree(b);
-	print_memory();
-	compact();
-	print_memory();
-  d = alloc(700);
-	print_memory();
-	printf("Livrando..\n");
-  letfree(a);
-	print_memory();
-	compact();
-	print_memory();
-  e = alloc(800);
-	print_memory();
-	
+	startUpMem(tamMem);
+	while(memRemain>0){
+		print_memory();
+		tam=candidatos[cont];
+		if(tam>tamMem){
+			printf("ERROR TAMANHO %i MUITO GRANDE PARA A MEMORIA. NAO CONSEGUIRA SER ALOCADO\n",tam);
+			candidatos[cont]=0;
+		}
+		else if(tam<=0)
+			printf("ERROR VALOR %i INVALIDO\n",tam);
+		else{
+			if(tam>0){
+				printf("ALOCANDO %i...\n",tam);
+				a = alloc(tam);
+				//candidatos[cont]=0;
+			}
+		}
+		if(memRemain<memInit){
+			pF=rand()%2;
+			printf("PF = %i\n",pF);
+			if(pF == 1){
+				vF=rand() % numCandidatos;
+				if(candidatos[vF]>0){
+					printf("LIBERANDO...\n");
+					letfree(arr[vF]);
+					compact();
+					candidatos[cont]=0;
+				}
+			}
+		}
+		memRemain=somatorio(candidatos,numCandidatos);
+		cont++;
+		if(cont>numCandidatos)	cont=0;
+		sleep(3);
+	}
 }
 
 int main(){
