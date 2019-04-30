@@ -4,7 +4,8 @@
 #include <time.h>
 #include <pthread.h> 
 
-//gcc -w wf.c -o wf && ./wf
+//gcc -w -pthread wf.c -o wf && ./wf
+
 
 typedef struct memoryList
 {
@@ -248,136 +249,8 @@ void mymem() {
 	print_memory();
 	
 }
-/*
-void pth( int pID ){ //cria uma thread generica.
-	void *a;
-	a=alloc(pID);
-	printf("MEMORIA %i\n",pID);
-	print_memory();
-	sleep(5); 
-	printf("FREE %i\n",pID);
-	letfree(a);
-	printf("COMPACT %i\n",pID);
-	compact();
-	print_memory();
-	printf("FIM %i\n",pID);
-}
 
-void listProcess(){
-	pthread_t th0, th1, th2, th3,th5,th6,th7,th8,th9,th4;
-
-	printf("Thread \"Main\n");
-	  
-	if( pthread_create( &th0, NULL, (void *) pth,(void *) 0 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 0.\n");
-	    exit(1);
-	}
-
-	if( pthread_create( &th1, NULL, (void *) pth,(void *) 10 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 1.\n");
-	    exit(1);
-	}
-	if( pthread_create( &th2, NULL, (void *) pth,(void *) 200 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 2.\n");
-	    exit(1);
-	}
-
-	if( pthread_create( &th3, NULL, (void *) pth,(void *) 30 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 3.\n");
-	    exit(1);
-	}
-
-	if( pthread_create( &th4, NULL, (void *) pth,(void *) 400 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 4.\n");
-	    exit(1);
-	}
-	if( pthread_create( &th5, NULL, (void *) pth,(void *) 4 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 5.\n");
-	    exit(1);
-	}
-	if( pthread_create( &th6, NULL, (void *) pth,(void *) 40 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 6.\n");
-	    exit(1);
-	}
-	if( pthread_create( &th7, NULL, (void *) pth,(void *) 100 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 7.\n");
-	    exit(1);
-	}
-	if( pthread_create( &th8, NULL, (void *) pth,(void *) 800 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 8.\n");
-	    exit(1);
-	}
-	if( pthread_create( &th9, NULL, (void *) pth,(void *) 4 ) != 0 ) {
-	    printf("Error \"pthread_create\" p/ Thread 9.\n");
-	    exit(1);
-	}
-
-
-	printf("Thread \"Main\": Sincroniza termino com Threads 0 a 9.\n");
-
-
-	if(pthread_join( th0, NULL)) {
-
-	 	fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-
- 	if(pthread_join( th1, NULL )) {
-
-	 	fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-
-	if(pthread_join( th2, NULL)) {
-
-		fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-
-	if(pthread_join( th3, NULL )) {
-
-	 	fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-
-	if(pthread_join( th4, NULL )) {
-
-	 	fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-	if(pthread_join( th5, NULL )) {
-
-	 	fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-	if(pthread_join( th6, NULL )) {
-
-	 	fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-	if(pthread_join( th7, NULL )) {
-
-	 	fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-	if(pthread_join( th8, NULL )) {
-
-	 	fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-	if(pthread_join( th9, NULL )) {
-
-	 	fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
-	printf("Thread \"Main\": Termina.\n");
-	exit(0);
-
-}
-*/
 int main(){
-	//startUpMem(520);
-	//listProcess();
 	mymem();
 	return 0;
 
