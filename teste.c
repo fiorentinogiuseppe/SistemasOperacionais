@@ -7,6 +7,12 @@
 
 //gcc -w -pthread wf.c -o wf && ./wf
 
+typedef struct candidatos
+{
+  int tam;
+  int flag;                      
+  void *ptr;           
+}candidatos;
 
 typedef struct memoryList
 {
@@ -64,7 +70,7 @@ void *alloc(unsigned req) {
 	memoryList* block = worst_block(req);
 
 	if(!block) {
-		printf("ERROR SEM MEMORIA...\n");
+		printf("ERROR SEM MEMORIA REAL...\n");
 		return NULL;
 	}
 
@@ -137,20 +143,25 @@ void contiguous_block_next( memoryList* current ){
 
 /* Frees a block of memory previously allocated by alloc. */
 void letfree(void* block) {
-
-	memoryList* current = head, *max = NULL;
-	current = current->next;
-	do {//aq eh lista circular current != head
-		if(!(current->alloc) && (!max || current->tam > max->tam) ) {
-			max = current;
+	/* Iterate over memory list, searching for the target block's container */
+	printf("LIBERANDO BLOCO %p...\n",block);
+	struct memoryList* current = head;
+	do {
+		printf("VERIFICANDO BLOCO %p...\n",block);
+		if(current->ptr == block) {
+			printf("ACHADO O BLOCO %p...\n",block);
+			break;
 		}
-		current = current->next;
-	} while(current != head); 
+	} while((current = current->next) != head);
 
+	/* Flag this block as freed */
 	current->alloc = 0;
+
 	contiguous_block_prev(current);
 	contiguous_block_next(current);
 }
+
+
 
 
 int length() {
@@ -231,36 +242,49 @@ int somatorio(int  arr[], int n){
 	return sum;
 }
 
+
 void mymem() {
-	void *a;
-	void *arr[5]; //array de ponteiros des elementos
+	memoryList *a=NULL;
+	memoryList *arr[5]; //array de ponteiros des elementos
+
 	for (int i = 0; i < 5; i++) {
-	    arr[i] = a;
+		arr[i] = a;
 	}
+
 	int pF, vF; //variaveis aleatorias para acessar o array
 	int tam;
-	int candidatos[] ={100,200,300,400,500,600};
+	int candidatos[] ={50,200,300,400,500,600};
+	int flag[]={0,0,0,0,0,0};
 	int numCandidatos=6;
 	int cont=0; //contador
 	int memRemain=0, memInit; //quanto de memoria ainda tem q usar usar 
+	
 	memRemain= somatorio(candidatos,numCandidatos);
 	memInit=memRemain;
 	tamMem=520;
 	startUpMem(tamMem);
 	while(memRemain>0){
+
 		print_memory();
 		tam=candidatos[cont];
+		printf("CONT %i\n\n\n", cont);
+		printf("TAMANHO %i\n\n\n",length());
 		if(tam>tamMem){
 			printf("ERROR TAMANHO %i MUITO GRANDE PARA A MEMORIA. NAO CONSEGUIRA SER ALOCADO\n",tam);
 			candidatos[cont]=0;
 		}
 		else if(tam<=0)
-			printf("ERROR VALOR %i INVALIDO\n",tam);
+			printf("ERROR VALOR %i INVALIDO ou 0\n",tam);
 		else{
 			if(tam>0){
-				printf("ALOCANDO %i...\n",tam);
-				a = alloc(tam);
-				//candidatos[cont]=0;
+				printf("TENTANDO ALOCAR %i...\n",tam);
+				arr[cont] = alloc(tam);
+				if(arr[cont]!=NULL){
+					printf("ALOCADO %i...\n",tam);
+					candidatos[cont]=0;
+					flag[cont]=1;
+					print_memory();
+				}
 			}
 		}
 		if(memRemain<memInit){
@@ -268,17 +292,21 @@ void mymem() {
 			printf("PF = %i\n",pF);
 			if(pF == 1){
 				vF=rand() % numCandidatos;
-				if(candidatos[vF]>0){
-					printf("LIBERANDO...\n");
+				printf("VF = %i \n",vF);
+				printf("Flag = %i\n", flag[vF]);
+				printf("candidato: %i\n", candidatos[vF]);
+				if(candidatos[vF]==0 && flag[vF]==1){
+					printf("LIBERANDO %p...\n", arr[vF]);
 					letfree(arr[vF]);
-					compact();
-					candidatos[cont]=0;
+					//compact();
+					flag[vF]=0;
+					print_memory();
 				}
 			}
 		}
 		memRemain=somatorio(candidatos,numCandidatos);
 		cont++;
-		if(cont>numCandidatos)	cont=0;
+		if(cont>=numCandidatos)	cont=0;
 		sleep(3);
 	}
 }
