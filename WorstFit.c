@@ -261,11 +261,11 @@ void print_memory() {
 }
 
 //Realiza somatorio da lista de memoria
-int somatorio(int  arr[], int n){
+int somatorio(candidatos * arr[], int n){
 	int sum=0;
 	for (int i = 0; i < n; i++)
 	 {
-	    sum = sum + arr[i];
+	    sum = sum + arr[i]->tam;
 	 }
 	return sum;
 }
@@ -317,7 +317,7 @@ void mymem() {
 	int tam;
 	int remo=0;
 	
-	memRemain= somatorio(cnddt,len);
+	memRemain= somatorio(lista,len);
 	memInit=memRemain;
 	tamMem=520;
 
@@ -387,7 +387,7 @@ void mymem() {
 			}
 		}
 		//Realiza o somatorio novamente
-		memRemain=somatorio(cnddt,len);
+		memRemain=somatorio(lista,len);
 		//Caso um valor tenha memoria muito grande e foi removido  ele segura o cont 1x pra continuar contando
 		if(remo==0) cont++;		
 		else remo=0;
