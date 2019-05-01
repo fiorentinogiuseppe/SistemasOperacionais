@@ -261,11 +261,19 @@ void print_memory() {
 }
 
 //Realiza somatorio da lista de memoria
-int somatorio(candidatos * arr[], int n){
+int somatorioTam(candidatos * arr[], int n){
 	int sum=0;
 	for (int i = 0; i < n; i++)
 	 {
 	    sum = sum + arr[i]->tam;
+	 }
+	return sum;
+}
+int somatorioFlag(candidatos * arr[], int n){
+	int sum=0;
+	for (int i = 0; i < n; i++)
+	 {
+	    sum = sum + arr[i]->flag;
 	 }
 	return sum;
 }
@@ -313,27 +321,29 @@ void mymem() {
 
 	int pF, vF; //variaveis aleatorias para acessar o array
 	int cont=0; //contador
-	int memRemain=0, memInit; //quanto de memoria ainda tem q usar usar 
+	int memRemain=0, memInit,flagRemain; //quanto de memoria ainda tem q usar usar 
 	int tam;
 	int remo=0;
 	
-	memRemain= somatorio(lista,len);
+	memRemain= somatorioTam(lista,len);
+	flagRemain=somatorioFlag(lista,len);
 	memInit=memRemain;
 	tamMem=520;
+
 
 	/***INICIANDO MEMORIA***/
 	startUpMem(tamMem);
 
 
-	//Firaca rodando ate que o tamanho da memoria que for requisitada seja 0
-	//Toda vez que a memora for alocada sera serado seu tamanho e a flag setado para 1
+	//Firaca rodando ate que o tamanho da memoria que for requisitada seja 0 e o total de flags ativas seja 0
+	//Toda vez que a memora for alocada sera zerado seu tamanho e a flag setado para 1
 	//Toda vez que for liberado sera feito compactacao e flag setada para 0
 	//Sera feito um somatorio a cada vez no loop pra saber se todas as memorias ja foram usadas
 	//Caso uma memoria seja muito grande e nao couber nem na memoria totalmente livre ela sera setada para zero
 	//Memoria zeradas fazem nada apenas um contador de 2;
 	//Memorias negativas o sistema da erro e sai;
 	/***RUNNING***/
-	while(memRemain>0){
+	while(1){
 		//Cada inicio de loop eh printado a memoria
 		print_memory();
 		//Pra ajudar na hora de escrever coloquei o tamanho para a variavel tam
@@ -387,7 +397,9 @@ void mymem() {
 			}
 		}
 		//Realiza o somatorio novamente
-		memRemain=somatorio(lista,len);
+		memRemain=somatorioTam(lista,len);
+		flagRemain=somatorioFlag(lista,len);
+		printf("Tamanho total das memorias que ainda falta a ser alocada:%i e flags alocadas:%i\n\n",memRemain,flagRemain);
 		//Caso um valor tenha memoria muito grande e foi removido  ele segura o cont 1x pra continuar contando
 		if(remo==0) cont++;		
 		else remo=0;
@@ -395,6 +407,7 @@ void mymem() {
 		if(cont>=len)	cont=0;
 		//sleep so pra ajudar a visualizar 
 		sleep(3);
+		if(memRemain=0 && flagRemain==0) break;
 	}
 }
 
