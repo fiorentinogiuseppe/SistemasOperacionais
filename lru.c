@@ -95,7 +95,7 @@ Hash* createHash( int capacity )
 void printQueue(Queue* q) {
 	struct QNode*ptr = q->front;
 	//start from the beginning
-	if(ptr == NULL) printf("FILA VAZIA..");
+	if(ptr == NULL) printf("FILA VAZIA..\n");
 	while(ptr != NULL) {
 		printf("|%d|",ptr->pageNumber);
 		ptr = ptr->next;
@@ -193,6 +193,14 @@ void Enqueue( Queue* queue, Hash* hash, unsigned pageNumber )
 
 /**Funcoes para o LRU**/
 
+void clearPages(Hash* hash){
+	printf("\n\n\nLIMPANDO MEMORIA\n\n\n");
+
+	for( int i = 0; i < hash->capacity; ++i ) {	
+		hash->array[i] = NULL;   
+	}
+}
+
 // Se Frame não está lá na memória, trazemos na memória e adicionamos na frente da fila - miss
 // O frame está lá na memória, nós movemos o frame para frente da fila - hit
 // Sempre movos para o inicio da fila, assim temos que desvincular este no da sua posição para movermos para o inicio da fila
@@ -200,13 +208,13 @@ void Enqueue( Queue* queue, Hash* hash, unsigned pageNumber )
 void ReferencePage( Queue* queue, Hash* hash, unsigned pageNumber ) 
 { 
 	printf("\n\nNova pagina de no. %d requisitada...\n",pageNumber);
-	//Cria um noh para repersentar a pagina requisitada
+	//Cria um noh para representar a pagina requisitada
 	QNode* reqPage = hash->array[ pageNumber ]; 
   
 	// Miss, pois a page nao esta e ele vai buscar	
 	if ( reqPage == NULL ){ 
 		//Teve um miss na queue
-		printf("Miss da pagina %d\n", pageNumber);
+		printf("\nMiss da pagina %d\n", pageNumber);
 		queue->miss++;
 		//Vai colocar na fila, mas usa os algoritmos para verificar que esta cheio ou nao, como já foi explicado
 	        Enqueue( queue, hash, pageNumber );
@@ -215,7 +223,7 @@ void ReferencePage( Queue* queue, Hash* hash, unsigned pageNumber )
 	else if (reqPage != queue->front) 
 	{ 
 		//Teve um hit na queue
-		printf("HIT da pagina %d\n", pageNumber);
+		printf("\nHIT da pagina %d\n", pageNumber);
 		queue->hit++;
 
 		//Desvincular a página solicitada de sua localização atual na fila.
@@ -265,8 +273,8 @@ void ReferencePage( Queue* queue, Hash* hash, unsigned pageNumber )
 //corresponding node address in the hash. If the queue is full, i.e. all the frames are full, we remove a node from the rear of queue, and add the new
 //node to the front of queue.
   
-/**Funcao main onde sera chamado tudo**/
-int main() 
+/**Funcao main onde sera chamado as paginas ja preditas**/
+int alreadSeq() 
 { 
 
 
@@ -279,13 +287,12 @@ int main()
 	Hash* hash = createHash( 16 ); 
 	
 
-	// Sequencia de pages 1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5
-
 	//p1
 	ReferencePage( q, hash, 1); 
 	ReferencePage( q, hash, 2); 
 	ReferencePage( q, hash, 4); 
-	ReferencePage( q, hash, 3); 
+	ReferencePage( q, hash, 3);
+
 	//p2
 	ReferencePage( q, hash, 1); 
 	ReferencePage( q, hash, 2); 
@@ -309,5 +316,59 @@ int main()
 	printf("Total de hits : %d\n", q->hit);
 	printf("Total de miss : %d\n", q->miss);
 	
-	return 0; 
 } 
+
+/**Funcao main onde sera chamado as paginas randomicamente**/
+int randomSeq() 
+{ 
+
+
+	// Memoria fisica com 8 paginas 
+	//frame = block of consecutive physical memory
+	Queue* q = createQueue( 8 ); 
+  
+	// Memoria virtual com 16 paginas ( 0 a 9)
+	//page = block of consecutive virtual memory
+	Hash* hash = createHash( 16 ); 
+	
+
+	
+	int refPag[]={ 1, 2, 4, 3, 1, 2, 5, 6, 2, 9, 4, 5, 8, 7, 8, 9};
+	int rando=0;
+	int clear=0;
+	time_t t;
+	
+	/* Intializes random number generator */
+	srand((unsigned) time(&t));
+
+	for(int i =0; i<16; i++){
+		printf("\nSequencia %i\n", i);
+		//rando=rand()%9;
+		//ReferencePage( q, hash, rando); 
+		
+		ReferencePage( q, hash, refPag[i]); 
+
+		clear=rand()%100;
+		//2% de chances de limpar
+		if(clear>=98){
+			printf("\n\nLimpando paginas virtuais...\n\n");
+			clearPages(hash);
+		}
+		//sleep(3);
+	}
+
+	// So os prints 
+	printf("\n\n\nFINALMENTE TEMOS...\n");
+	printQueue(q);
+	printf("Total de hits : %d\n", q->hit);
+	printf("Total de miss : %d\n", q->miss);
+	
+} 
+
+
+int main(){
+	
+
+	randomSeq();
+	return 0;
+}
