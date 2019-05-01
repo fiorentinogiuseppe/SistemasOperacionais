@@ -7,41 +7,71 @@
 
 //gcc -w -pthread wf.c -o wf && ./wf
 
-typedef struct candidatos
-{
-  int tam;
-  int flag;                      
-  void *ptr;           
-}candidatos;
 
+/*********Estruturas*********/
+
+//Estrutura que representa um noh da lista circular duplamente ligada pra modelar a memoria
 typedef struct memoryList
-{
-  // doubly-linked list
-  struct memoryList *last;
-  struct memoryList *next;
+{	
+	struct memoryList *last;
+	struct memoryList *next;
 
-  unsigned tam;
-  unsigned alloc;                      
-  void *ptr;           
+	unsigned tam; //tamanho alocado
+	unsigned alloc; //indica se esta alocado ou nao                      
+	void *ptr; //ponteiro do proprio noh           
 }memoryList;
 
+/*********Variaveis Globais*********/
 unsigned tamMem;
 void *myMemory = NULL;
 
+//Ponteiros para o inicio e o proximo dps do free
 static memoryList *head;
 static memoryList *next;
 
 
+/*********Funções que simulam o Gerenciamento de Memoria *********/
+
+//Inicializa a memoria
+void startUpMem(unsigned tam) {
+  	
+	//Variavel global é inicializada com o valor de inicio da memoria
+	tamMem = tam;
+	
+	//Preenche os dados iniciais da estrutura, ou seja cria o head
+	myMemory = malloc(tam);
+	head = malloc(sizeof(memoryList));
+	head->tam = tam;
+	head->alloc = 0;
+	head->ptr = myMemory;
+	
+	//Inicia o next
+	next = head;
+	//Inicia o head	
+	head->last = head;
+	head->next = head;
+}
+
+
+//Algoritmo que encontra o bloco de maior memoria
 memoryList* worst_block(unsigned req) {
 
+	//cria variavel que recebe a head = current
+	//cria variavel que recebe o maior =  max
 	memoryList* current = head, *max = NULL;
 
-	do {//aq eh lista circular current != head
+	//loop para andar na lista e verificar o maior bloco existente
+	do {
+		//Varifica se esta alocado se estiver ele ignora(uso da ! faz isso) 
+		//Verifica é o maior
 		if(!(current->alloc) && (!max || current->tam > max->tam) ) {
 			max = current;
 		}
+		//proximo nó
 		current = current->next;
 	}while(current != head); 
+	
+	//Verifica se tem a memoria para aql tamanho requisitado
 	if(max->tam >= req) {
 		return max;
 	} else {
@@ -49,121 +79,61 @@ memoryList* worst_block(unsigned req) {
 	}
 }
 
-void startUpMem(unsigned sz) {
-  
-	tamMem = sz;
-
-	/* Initialize memory management structures */
-	myMemory = malloc(sz);
-	head = malloc(sizeof(memoryList));
-	head->tam = sz;
-	head->alloc = 0;
-	head->ptr = myMemory;
-	next = head;
-
-	head->last = head;
-	head->next = head;
-}
-
-
+//Adicionando valor na lista. Para esse momento chamamos de alocacao de memoria
 void *alloc(unsigned req) {
+	//Busca o bloco de maior tamanho
 	memoryList* block = worst_block(req);
-
+	
+	//Se o maior bloco eh menor que a memoria requisitada entao	
+	//ele indica que n tem memoria e retorna com null
 	if(!block) {
-		printf("ERROR SEM MEMORIA REAL...\n");
+		printf("NAO HA ESPACO PARA O TAMANHO REQUISITADO...\n");
 		return NULL;
 	}
-
+	
+	//Se o tamanho requisitado eh menor que o tamanho da maior memoria
 	if(block->tam > req) {
-		// Concontainer for unallocated remainder of this block 
-		memoryList* remainder = malloc(sizeof(memoryList));
-    	
-		// Insert into linked list 
+		//O quanto resta de memoria
+		//Quano a memoria inicia o head eh o maior e ele tem os ponteiros apontando para ele mesmo
+		//Uma nova memoria vai pra frente
+		//Criamos uma memoria para indicar o que resta
+		//Pois o antigo bloco macio de memoria sera quebrado 
+		memoryList* resta = malloc(sizeof(memoryList));    		
+		
+		resta->next = block->next;
+		//Atualiza o dado do bloco que vem antes do free para apontar para esse resta bloco
+		resta->next->last = resta;
+		//o bloco free fica apos o resta bloco
+		resta->last = block;
+		//o antigo next do |free| eh atualizado pra ficar apos o resta bloco
+		block->next = resta;
 
-		remainder->next = block->next;
-
-
-
-		remainder->next->last = remainder;
-
-		remainder->last = block;
-
-		block->next = remainder;
-    
-		// Divide up allocated memory 
-		remainder->tam = block->tam - req;
-		remainder->alloc = 0;
-		remainder->ptr = block->ptr + req;
+		// 
+		resta->tam = block->tam - req;
+		printf("\n\n\n\n\n\nresta->TAM = %i\n\n\n\n\n\n",resta->tam);
+		//
+		resta->alloc = 0;
+		//resta ponteiro indicando q eh a memoria seguinte
+		resta->ptr = block->ptr + req; 
+		//
 		block->tam = req;
-		next = remainder;
+
+		//next recebe esse resta valor,  pois o bloco ainda ta no fim
+		next = resta;
 	} else {
+		//Se o tamanho requisitado eh igual que o tamanho da maior memoria eh so indicar o bloco que vem antes dele no next
 		next = block->next;
 	}
-  
+	
+  	//indica que o bloco esta alocado
 	block->alloc = 1;
   
-	//Return pointer to the allocated block 
+	//Returna o ponteiro da memoria alocada
 	return block->ptr;
 
 }
 
-
-void contiguous_block_prev( memoryList* current ){
-	if(current != head && !(current->last->alloc)) {
-		memoryList* prev = current->last;
-		prev->next = current->next;
-		prev->next->last = prev;
-		prev->tam += current->tam;
-    
-		if(next == current) {
-			next = prev;
-		}
-    
-		free(current);
-		current = prev;
-	}
-}
-
-
-void contiguous_block_next( memoryList* current ){
-	  if(current->next != head && !(current->next->alloc)) {
-		struct memoryList* second = current->next;
-		current->next = second->next;
-		current->next->last = current;
-		current->tam += second->tam;
-    
-    		if(next == second) {
-			next = current;
-		}
-    
-	    	free(second);
-	}
-
-}
-
-/* Frees a block of memory previously allocated by alloc. */
-void letfree(void* block) {
-	/* Iterate over memory list, searching for the target block's container */
-	printf("LIBERANDO BLOCO %p...\n",block);
-	struct memoryList* current = head;
-	do {
-		printf("VERIFICANDO BLOCO %p...\n",block);
-		if(current->ptr == block) {
-			printf("ACHADO O BLOCO %p...\n",block);
-			break;
-		}
-	} while((current = current->next) != head);
-
-	/* Flag this block as freed */
-	current->alloc = 0;
-
-	contiguous_block_prev(current);
-	contiguous_block_next(current);
-}
-
-
-
-
+//Conta o tamanho da lista que representa a memoria
 int length() {
 	int length = 0;
 	memoryList *current = head;
@@ -175,6 +145,8 @@ int length() {
 	
    return length;
 }
+
+//Ordena baseado na alocacao. Memoria livre vai pro final da lista
 void sort() {
    int i, j, k, tempAlloc, tempTam;
    int *tempPtr;
@@ -189,7 +161,7 @@ void sort() {
       next = head->next;
 		
       for ( j = 1 ; j < k ; j++ ) { 
-         if ( current->alloc > next->alloc ) {
+         if ( current->alloc < next->alloc ) {
             tempAlloc = current->alloc;
             current->alloc = next->alloc;
             next->alloc = tempAlloc;
@@ -212,30 +184,74 @@ void sort() {
 	  
 }
 
+//realiza compactacao
+//Ordena primeiro e depois junta td mundo que tem memoria livre em uma unica memoria
 void compact(){
+	//usado para andar na lista
 	memoryList *current = head;
 	sort();
 	do{
-		contiguous_block_next(current);		
+		//So entra se nao for a cabeca e se o anterior nao esta alocado
+		//Anda ate o ultimo alocado quando chegar nele entra no if sempre ate chegar na cabeca novamente
+		if(current != head && !(current->last->alloc)) {
+			//cria um novo noh com a memoria livre anterior da memoria atual que eh a ultima que foi alocada
+			memoryList* prev = current->last;
+						
+			prev->next = current->next;
+			prev->next->last = prev;
+			//Vai incrementando a memoria
+			prev->tam += current->tam;
+    	
+			if(next == current) {
+				next = prev;
+			}
+    
+			free(current);
+			current = prev;
+		}
 		current = current->next;
-	} while(current != head); 
+	} while(current != head); 	
+	//Quando chegar na cabeca tera apenas uma memoria com o tamanho que eh a soma de todas as anteriores
 
 }
 
+//Implementacao da liberacao de memoria
+void letfree(void* block) {
+	printf("\n\n\nLIBERANDO BLOCO %p...\n",block);
+	memoryList* current = head;
+	//vai andando na lista ate achar o bloco 
+	do {
+		printf("VERIFICANDO BLOCO DE TAMANHO %I...\n",block->tam);
+		if(current->ptr == block) {
+			printf("ACHADO O BLOCO %p DE TAMANHO...\n",block, block->tam);
+			break;//forca saida do loop, pois achou a memoria
+		}
+	} while((current = current->next) != head);
 
-/* Use this function to print out the current contents of memory. */
+	//Indica que foi liberado o bloco requisitado para ser liberado
+	current->alloc = 0;
+	
+	//Realiza compactacao
+	compact();
+}
+
+
+
+//print da lista
 void print_memory() {
-  printf("Memory List {\n");
-  /* Iterate over memory list */
-  struct memoryList* index = head;
-  do {
-    printf("\tBlock %p,\tsize %d,\t%s\n",
-           index->ptr,
-           index->tam,
-           (index->alloc ? "[ALLOCATED]" : "[FREE]"));
-  } while((index = index->next) != head);
-  printf("}\n");
+	printf("Memory List {\n");
+
+	memoryList* index = head;
+	do {
+		printf("\tBlock %p,\tsize %d,\t%s\n",
+		index->ptr,
+		index->tam,
+		(index->alloc ? "[ALLOCATED]" : "[FREE]"));
+	} while((index = index->next) != head);
+	printf("}\n");
 }
+
+//Realiza somatorio da lista de memoria
 int somatorio(int  arr[], int n){
 	int sum=0;
 	for (int i = 0; i < n; i++)
@@ -246,6 +262,7 @@ int somatorio(int  arr[], int n){
 }
 
 
+//Principal funcao para trabalhar a memoria
 void mymem() {
 	memoryList *a=NULL;
 	memoryList *arr[5]; //array de ponteiros des elementos
@@ -314,6 +331,8 @@ void mymem() {
 	}
 }
 
+
+/*********Funções Main*********/
 int main(){
 	mymem();
 	return 0;
