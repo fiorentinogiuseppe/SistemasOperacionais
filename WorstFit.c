@@ -10,6 +10,14 @@
 
 /*********Estruturas*********/
 
+typedef struct candidatos
+{
+  int tam;
+  int flag;                      
+  void *ptr;           
+}candidatos;
+
+
 //Estrutura que representa um noh da lista circular duplamente ligada pra modelar a memoria
 typedef struct memoryList
 {	
@@ -18,14 +26,14 @@ typedef struct memoryList
 
 	unsigned tam; //tamanho alocado
 	unsigned alloc; //indica se esta alocado ou nao                      
-	void *ptr; //ponteiro do proprio noh           
+	void *ptr; //ponteiro do proprio noh ele q indicara a ordem de colocacao        
 }memoryList;
 
 /*********Variaveis Globais*********/
 unsigned tamMem;
 void *myMemory = NULL;
 
-//Ponteiros para o inicio e o proximo dps do free
+//Ponteiros para o inicio e o free
 static memoryList *head;
 static memoryList *next;
 
@@ -98,27 +106,29 @@ void *alloc(unsigned req) {
 		//Uma nova memoria vai pra frente
 		//Criamos uma memoria para indicar o que resta
 		//Pois o antigo bloco macio de memoria sera quebrado 
+		//Novo bloco com tudo que sobrou do bloco block macico
+		//Ficara entre o block e o block->next
+		//Como eh lista circular nao da pra colocar no fim por isso eh colocado desta forma
 		memoryList* resta = malloc(sizeof(memoryList));    		
 		
+		//Inicializa o que resta com os dados do block anterior livre
+		//O block vai sempre pro fim do bloco macico
+		//Int o rest fica entre o block e o que vinha depois do block
 		resta->next = block->next;
-		//Atualiza o dado do bloco que vem antes do free para apontar para esse resta bloco
 		resta->next->last = resta;
-		//o bloco free fica apos o resta bloco
 		resta->last = block;
-		//o antigo next do |free| eh atualizado pra ficar apos o resta bloco
 		block->next = resta;
 
-		// 
+		//Atualizacao de pesos. O bloco que resta tera este peso 
 		resta->tam = block->tam - req;
-		printf("\n\n\n\n\n\nresta->TAM = %i\n\n\n\n\n\n",resta->tam);
-		//
+		//Atualizacao de pesos. O bloco que resta esta livre
 		resta->alloc = 0;
-		//resta ponteiro indicando q eh a memoria seguinte
+		//Resta ponteiro indicando q eh a memoria seguinte
 		resta->ptr = block->ptr + req; 
-		//
+		//O bloco anterior macico agr recebe este valor
 		block->tam = req;
 
-		//next recebe esse resta valor,  pois o bloco ainda ta no fim
+		//next recebe resta pois indica onde fia o free
 		next = resta;
 	} else {
 		//Se o tamanho requisitado eh igual que o tamanho da maior memoria eh so indicar o bloco que vem antes dele no next
@@ -217,13 +227,12 @@ void compact(){
 
 //Implementacao da liberacao de memoria
 void letfree(void* block) {
-	printf("\n\n\nLIBERANDO BLOCO %p...\n",block);
 	memoryList* current = head;
 	//vai andando na lista ate achar o bloco 
 	do {
-		printf("VERIFICANDO BLOCO DE TAMANHO %I...\n",block->tam);
+		printf("	VERIFICANDO BLOCO %p...\n",block);
 		if(current->ptr == block) {
-			printf("ACHADO O BLOCO %p DE TAMANHO...\n",block, block->tam);
+			printf("	ACHADO O BLOCO %p\n",block);
 			break;//forca saida do loop, pois achou a memoria
 		}
 	} while((current = current->next) != head);
@@ -261,72 +270,130 @@ int somatorio(int  arr[], int n){
 	return sum;
 }
 
+//Funcao que remove o elemento da lista que eh muito grande
+candidatos *removeGrande(candidatos cnddRemovivel[], int len, candidatos *lista[]){
+	int n=len;
+	candidatos *lista2 [n];
+	int i=0;
+	int i2=0;
+	while(i<n){
+		if(lista[i]->tam!=cnddRemovivel->tam){
+			if(i<n+1){
+			 lista2[i2]=lista[i];
+			}
+		}
+		else{	
+			lista2[i2]=lista[i+1];
+			i++;
+		}
+		i++;
+		i2++;
+	}
+	//Realiza a copia da nova lista para a lista antiga	
+	memcpy(lista,lista2,sizeof(lista2));
+}
 
 //Principal funcao para trabalhar a memoria
 void mymem() {
-	memoryList *a=NULL;
-	memoryList *arr[5]; //array de ponteiros des elementos
-
-	for (int i = 0; i < 5; i++) {
-		arr[i] = a;
+	/***CRIA CANDIDATOS***/
+	int cnddt[] = {600,200,300,400,500,50};
+	/****INICIA CANDIDATOS****/
+	int len = sizeof(cnddt)/sizeof(cnddt[0]);
+	candidatos * a = NULL;
+	candidatos *lista [len];
+	for(int i=0; i< len; i++){
+		a = malloc(sizeof(candidatos));
+		a->tam = cnddt[i];
+		a->ptr=NULL;
+		a->flag=0;
+		lista[i]=a;
 	}
 
+	/***VARIAVEIS***/	
+
 	int pF, vF; //variaveis aleatorias para acessar o array
-	int tam;
-	int candidatos[] ={50,200,300,400,500,600};
-	int flag[]={0,0,0,0,0,0};
-	int numCandidatos=6;
 	int cont=0; //contador
 	int memRemain=0, memInit; //quanto de memoria ainda tem q usar usar 
+	int tam;
+	int remo=0;
 	
-	memRemain= somatorio(candidatos,numCandidatos);
+	memRemain= somatorio(cnddt,len);
 	memInit=memRemain;
 	tamMem=520;
-	startUpMem(tamMem);
-	while(memRemain>0){
 
+	/***INICIANDO MEMORIA***/
+	startUpMem(tamMem);
+
+
+	//Firaca rodando ate que o tamanho da memoria que for requisitada seja 0
+	//Toda vez que a memora for alocada sera serado seu tamanho e a flag setado para 1
+	//Toda vez que for liberado sera feito compactacao e flag setada para 0
+	//Sera feito um somatorio a cada vez no loop pra saber se todas as memorias ja foram usadas
+	//Caso uma memoria seja muito grande e nao couber nem na memoria totalmente livre ela sera setada para zero
+	//Memoria zeradas fazem nada apenas um contador de 2;
+	//Memorias negativas o sistema da erro e sai;
+	/***RUNNING***/
+	while(memRemain>0){
+		//Cada inicio de loop eh printado a memoria
 		print_memory();
-		tam=candidatos[cont];
-		printf("CONT %i\n\n\n", cont);
-		printf("TAMANHO %i\n\n\n",length());
+		//Pra ajudar na hora de escrever coloquei o tamanho para a variavel tam
+		tam=lista[cont]->tam;
+		
+		/** Memorias Invalidas**/
+		//Memoria maior que a do sistema é zerado e não faz mais nada
 		if(tam>tamMem){
-			printf("ERROR TAMANHO %i MUITO GRANDE PARA A MEMORIA. NAO CONSEGUIRA SER ALOCADO\n",tam);
-			candidatos[cont]=0;
+			printf("ERROR TAMANHO %i MUITO GRANDE PARA A MEMORIA. NAO CONSEGUIRA SER ALOCADO\nREMOVENDO...\n",tam);
+			removeGrande(lista[cont],len, &lista);
+			remo=1;
+			len--;
 		}
-		else if(tam<=0)
-			printf("ERROR VALOR %i INVALIDO ou 0\n",tam);
+		//Memorias zeradas não faz nada apenas um sleep
+		else if(tam==0){
+			sleep(2);
+		}
+		//Memorias negativas dao erro e sai do sistema
+		else if(tam<0)
+			return -1;
+		/***Memorias validas***/
 		else{
+			//So pra garantir que so entrara valores maiores que zero
 			if(tam>0){
-				printf("TENTANDO ALOCAR %i...\n",tam);
-				arr[cont] = alloc(tam);
-				if(arr[cont]!=NULL){
-					printf("ALOCADO %i...\n",tam);
-					candidatos[cont]=0;
-					flag[cont]=1;
-					print_memory();
+				printf("\nTENTANDO ALOCAR %i...\n",tam);
+				//Vai ser tentado alocar
+				lista[cont]->ptr = alloc(tam);
+				//Sem memoria disponivel retorna null e teoricamente ele espera ate entrar
+				if(lista[cont]->ptr!=NULL){
+					printf("	ALOCADO %i...\n",tam);
+					lista[cont]->tam=0;
+					lista[cont]->flag=1;
 				}
 			}
 		}
+		//O somatorio tem que ser menor que o inicio, isso foi criado so pra controlar e no inicio ja nao remover
 		if(memRemain<memInit){
+			//Gera um aleatorio para dizer se vai remover ou nao
 			pF=rand()%2;
-			printf("PF = %i\n",pF);
 			if(pF == 1){
-				vF=rand() % numCandidatos;
-				printf("VF = %i \n",vF);
-				printf("Flag = %i\n", flag[vF]);
-				printf("candidato: %i\n", candidatos[vF]);
-				if(candidatos[vF]==0 && flag[vF]==1){
-					printf("LIBERANDO %p...\n", arr[vF]);
-					letfree(arr[vF]);
+				//Gera um aleatorio apra dizer qual sera removido
+				vF=(rand() % len);
+				//Verifica se o valor a ser removido ja foi alocado e se ainda esta alocao
+				if(lista[vF]->tam==0 && lista[vF]->flag==1){
+					printf("\nLIBERANDO %p...\n", lista[vF]->ptr);
+					letfree(lista[vF]->ptr);
 					compact();
-					flag[vF]=0;
-					print_memory();
+					//Indica que ja foi removido
+					lista[vF]->flag=0;
 				}
 			}
 		}
-		memRemain=somatorio(candidatos,numCandidatos);
-		cont++;
-		if(cont>=numCandidatos)	cont=0;
+		//Realiza o somatorio novamente
+		memRemain=somatorio(cnddt,len);
+		//Caso um valor tenha memoria muito grande e foi removido  ele segura o cont 1x pra continuar contando
+		if(remo==0) cont++;		
+		else remo=0;
+		//Como conto atraves da lista se o valor do contador passou o tamanho da lista ele reinicia pra procurar novamente
+		if(cont>=len)	cont=0;
+		//sleep so pra ajudar a visualizar 
 		sleep(3);
 	}
 }
@@ -334,6 +401,7 @@ void mymem() {
 
 /*********Funções Main*********/
 int main(){
+	
 	mymem();
 	return 0;
 
