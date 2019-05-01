@@ -405,9 +405,14 @@ void mymem() {
 		else remo=0;
 		//Como conto atraves da lista se o valor do contador passou o tamanho da lista ele reinicia pra procurar novamente
 		if(cont>=len)	cont=0;
+		
+		//SAIDA DO LOOP. So quando ninguem pra alocar e nao tem flag alocada
+		if(memRemain==0 && flagRemain==0) {
+			printf("saindo...");
+			return;
+		}
 		//sleep so pra ajudar a visualizar 
 		sleep(3);
-		if(memRemain=0 && flagRemain==0) break;
 	}
 }
 
