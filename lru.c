@@ -193,14 +193,6 @@ void Enqueue( Queue* queue, Hash* hash, unsigned pageNumber )
 
 /**Funcoes para o LRU**/
 
-void clearPages(Hash* hash){
-	printf("\n\n\nLIMPANDO MEMORIA\n\n\n");
-
-	for( int i = 0; i < hash->capacity; ++i ) {	
-		hash->array[i] = NULL;   
-	}
-}
-
 // Se Frame não está lá na memória, trazemos na memória e adicionamos na frente da fila - miss
 // O frame está lá na memória, nós movemos o frame para frente da fila - hit
 // Sempre movos para o inicio da fila, assim temos que desvincular este no da sua posição para movermos para o inicio da fila
@@ -309,53 +301,6 @@ int alreadSeq()
 	ReferencePage( q, hash, 8); 
 	ReferencePage( q, hash, 9); 
 	
-
-	// So os prints 
-	printf("\n\n\nFINALMENTE TEMOS...\n");
-	printQueue(q);
-	printf("Total de hits : %d\n", q->hit);
-	printf("Total de miss : %d\n", q->miss);
-	
-} 
-
-/**Funcao main onde sera chamado as paginas randomicamente**/
-int randomSeq() 
-{ 
-
-
-	// Memoria fisica com 8 paginas 
-	//frame = block of consecutive physical memory
-	Queue* q = createQueue( 8 ); 
-  
-	// Memoria virtual com 16 paginas ( 0 a 9)
-	//page = block of consecutive virtual memory
-	Hash* hash = createHash( 16 ); 
-	
-
-	
-	int refPag[]={ 1, 2, 4, 3, 1, 2, 5, 6, 2, 9, 4, 5, 8, 7, 8, 9};
-	int rando=0;
-	int clear=0;
-	time_t t;
-	
-	/* Intializes random number generator */
-	srand((unsigned) time(&t));
-
-	for(int i =0; i<16; i++){
-		printf("\nSequencia %i\n", i);
-		//rando=rand()%9;
-		//ReferencePage( q, hash, rando); 
-		
-		ReferencePage( q, hash, refPag[i]); 
-
-		clear=rand()%100;
-		//2% de chances de limpar
-		if(clear>=98){
-			printf("\n\nLimpando paginas virtuais...\n\n");
-			clearPages(hash);
-		}
-		//sleep(3);
-	}
 
 	// So os prints 
 	printf("\n\n\nFINALMENTE TEMOS...\n");
