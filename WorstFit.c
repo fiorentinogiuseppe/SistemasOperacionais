@@ -7,6 +7,11 @@
 
 //gcc -w -pthread wf.c -o wf && ./wf
 
+/** Definindo funções**/
+int length();
+void sort() ;
+void compact();
+
 
 /*********Estruturas*********/
 
@@ -96,7 +101,18 @@ void *alloc(unsigned req) {
 	//ele indica que n tem memoria e retorna com null
 	if(!block) {
 		printf("NAO HA ESPACO PARA O TAMANHO REQUISITADO...\n");
-		return NULL;
+		printf("COMPACTANDO MEMORIA...\n");		
+		//Tenta compactar
+		compact();
+		printf("MEMORIA COMPACTAda...\n");
+		printf("VERIFICANDO NOVAMENTE SE HA ESPACO SUFICIENTE...\n");
+		//Verifica novamente
+		block = worst_block(req);
+		//Se ainda ta nil int nao tem espaço mesmo
+		if(!block){
+			printf("REALMENTE NAO HA ESPACO PARA O TAMANHO REQUISITADO...\n");
+			return NULL;
+		}
 	}
 	
 	//Se o tamanho requisitado eh menor que o tamanho da maior memoria
@@ -241,7 +257,7 @@ void letfree(void* block) {
 	current->alloc = 0;
 	
 	//Realiza compactacao
-	compact();
+	//compact();
 }
 
 
@@ -363,7 +379,7 @@ void mymem() {
 		}
 		//Memorias negativas dao erro e sai do sistema
 		else if(tam<0)
-			return -1;
+			exit(1);
 		/***Memorias validas***/
 		else{
 			//So pra garantir que so entrara valores maiores que zero
@@ -390,7 +406,6 @@ void mymem() {
 				if(lista[vF]->tam==0 && lista[vF]->flag==1){
 					printf("\nLIBERANDO %p...\n", lista[vF]->ptr);
 					letfree(lista[vF]->ptr);
-					compact();
 					//Indica que ja foi removido
 					lista[vF]->flag=0;
 				}
