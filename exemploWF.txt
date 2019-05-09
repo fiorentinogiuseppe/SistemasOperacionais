@@ -1,0 +1,269 @@
+ 
+Memory List {
+	Block 0x563abd93b320,	size 520,	[FREE]
+}
+ERROR TAMANHO 600 MUITO GRANDE PARA A MEMORIA. NAO CONSEGUIRA SER ALOCADO
+REMOVENDO...
+Tamanho total das memorias que ainda falta a ser alocada:1450 e flags alocadas:0
+
+Memory List {
+	Block 0x563abd93b320,	size 520,	[FREE]
+}
+
+TENTANDO ALOCAR 200...
+	ALOCADO 200...
+Tamanho total das memorias que ainda falta a ser alocada:1250 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b320,	size 200,	[ALLOCATED]
+	Block 0x563abd93b3e8,	size 320,	[FREE]
+}
+
+TENTANDO ALOCAR 300...
+	ALOCADO 300...
+
+LIBERANDO 0x563abd93b320...
+	VERIFICANDO BLOCO 0x563abd93b320...
+	ACHADO O BLOCO 0x563abd93b320
+Tamanho total das memorias que ainda falta a ser alocada:950 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b320,	size 200,	[FREE]
+	Block 0x563abd93b3e8,	size 300,	[ALLOCATED]
+	Block 0x563abd93b514,	size 20,	[FREE]
+}
+
+TENTANDO ALOCAR 400...
+NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+COMPACTANDO MEMORIA...
+MEMORIA COMPACTAda...
+VERIFICANDO NOVAMENTE SE HA ESPACO SUFICIENTE...
+REALMENTE NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+Tamanho total das memorias que ainda falta a ser alocada:950 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b3e8,	size 300,	[ALLOCATED]
+	Block 0x563abd93b320,	size 220,	[FREE]
+}
+
+TENTANDO ALOCAR 500...
+NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+COMPACTANDO MEMORIA...
+MEMORIA COMPACTAda...
+VERIFICANDO NOVAMENTE SE HA ESPACO SUFICIENTE...
+REALMENTE NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+Tamanho total das memorias que ainda falta a ser alocada:950 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b3e8,	size 300,	[ALLOCATED]
+	Block 0x563abd93b320,	size 220,	[FREE]
+}
+
+TENTANDO ALOCAR 50...
+	ALOCADO 50...
+Tamanho total das memorias que ainda falta a ser alocada:900 e flags alocadas:2
+
+Memory List {
+	Block 0x563abd93b3e8,	size 300,	[ALLOCATED]
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b352,	size 170,	[FREE]
+}
+
+LIBERANDO 0x563abd93b3e8...
+	VERIFICANDO BLOCO 0x563abd93b3e8...
+	ACHADO O BLOCO 0x563abd93b3e8
+Tamanho total das memorias que ainda falta a ser alocada:900 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b3e8,	size 300,	[FREE]
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b352,	size 170,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:900 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b3e8,	size 300,	[FREE]
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b352,	size 170,	[FREE]
+}
+
+TENTANDO ALOCAR 400...
+NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+COMPACTANDO MEMORIA...
+MEMORIA COMPACTAda...
+VERIFICANDO NOVAMENTE SE HA ESPACO SUFICIENTE...
+	ALOCADO 400...
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:2
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+
+TENTANDO ALOCAR 500...
+NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+COMPACTANDO MEMORIA...
+MEMORIA COMPACTAda...
+VERIFICANDO NOVAMENTE SE HA ESPACO SUFICIENTE...
+REALMENTE NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:2
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:2
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:2
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:2
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:2
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+
+TENTANDO ALOCAR 500...
+NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+COMPACTANDO MEMORIA...
+MEMORIA COMPACTAda...
+VERIFICANDO NOVAMENTE SE HA ESPACO SUFICIENTE...
+REALMENTE NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:2
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:2
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[ALLOCATED]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+
+LIBERANDO 0x563abd93b320...
+	VERIFICANDO BLOCO 0x563abd93b320...
+	ACHADO O BLOCO 0x563abd93b320
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[FREE]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[FREE]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b320,	size 50,	[FREE]
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b578,	size 70,	[FREE]
+}
+
+TENTANDO ALOCAR 500...
+NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+COMPACTANDO MEMORIA...
+MEMORIA COMPACTAda...
+VERIFICANDO NOVAMENTE SE HA ESPACO SUFICIENTE...
+REALMENTE NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b3e8,	size 400,	[ALLOCATED]
+	Block 0x563abd93b320,	size 120,	[FREE]
+}
+
+LIBERANDO 0x563abd93b3e8...
+	VERIFICANDO BLOCO 0x563abd93b3e8...
+	ACHADO O BLOCO 0x563abd93b3e8
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:0
+
+Memory List {
+	Block 0x563abd93b3e8,	size 400,	[FREE]
+	Block 0x563abd93b320,	size 120,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:0
+
+Memory List {
+	Block 0x563abd93b3e8,	size 400,	[FREE]
+	Block 0x563abd93b320,	size 120,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:0
+
+Memory List {
+	Block 0x563abd93b3e8,	size 400,	[FREE]
+	Block 0x563abd93b320,	size 120,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:500 e flags alocadas:0
+
+Memory List {
+	Block 0x563abd93b3e8,	size 400,	[FREE]
+	Block 0x563abd93b320,	size 120,	[FREE]
+}
+
+TENTANDO ALOCAR 500...
+NAO HA ESPACO PARA O TAMANHO REQUISITADO...
+COMPACTANDO MEMORIA...
+MEMORIA COMPACTAda...
+VERIFICANDO NOVAMENTE SE HA ESPACO SUFICIENTE...
+	ALOCADO 500...
+Tamanho total das memorias que ainda falta a ser alocada:0 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b3e8,	size 500,	[ALLOCATED]
+	Block 0x563abd93b5dc,	size 20,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:0 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b3e8,	size 500,	[ALLOCATED]
+	Block 0x563abd93b5dc,	size 20,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:0 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b3e8,	size 500,	[ALLOCATED]
+	Block 0x563abd93b5dc,	size 20,	[FREE]
+}
+Tamanho total das memorias que ainda falta a ser alocada:0 e flags alocadas:1
+
+Memory List {
+	Block 0x563abd93b3e8,	size 500,	[ALLOCATED]
+	Block 0x563abd93b5dc,	size 20,	[FREE]
+}
+
+LIBERANDO 0x563abd93b3e8...
+	VERIFICANDO BLOCO 0x563abd93b3e8...
+	ACHADO O BLOCO 0x563abd93b3e8
+Tamanho total das memorias que ainda falta a ser alocada:0 e flags alocadas:0
+
+saindo...
