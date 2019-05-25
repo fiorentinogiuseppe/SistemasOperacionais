@@ -12,8 +12,8 @@
 #define DIRECT_INDEX_BLOCKS 6
 #define ONE_INDEX_LIMIT 131072
 #define ONE_INDEX_BLOCKS 256
-#define TWO_INDEX_LIMIT 2097152 // 4096*512
-#define TWO_INDEX_BLOCKS 4096
+#define INDEX_LIMIT 2097152 // 4096*512
+#define INDEX_BLOCKS 4096
 #define PATH "vdisk"
 
 #define FILE_TYPE_FILE 1
@@ -26,13 +26,13 @@
 
 typedef struct mygroup_descriptor
 {
-    char bg_volume_name[EXT2_NAME_LENGTH + 1];         /* Volume name*/
-    uint16_t bg_block_bitmap;        /* Blocks bitmap block */ 
-    uint16_t bg_inode_bitmap;        /* Inodes bitmap block */ 
-    uint16_t bg_inode_table;         /* Inodes table block */
-    uint16_t bg_free_blocks_count;   /* Free blocks count */
-    uint16_t bg_free_inodes_count;   /* Free inodes count */
-    uint16_t bg_used_dirs_count;     /* Directories count */
+    char bg_volume_name[EXT2_NAME_LENGTH + 1];          /* Volume name*/
+    uint16_t bg_block_bitmap;        			/* Blocks bitmap block */ 
+    uint16_t bg_inode_bitmap;        			/* Inodes bitmap block */ 
+    uint16_t bg_inode_table;         			/* Inodes table block */
+    uint16_t bg_free_blocks_count;   			/* Free blocks count */
+    uint16_t bg_free_inodes_count;   			/* Free inodes count */
+    uint16_t bg_used_dirs_count;     			/* Directories count */
 } group_descriptor;
 
 //Identidade de um arquivo ou diretório

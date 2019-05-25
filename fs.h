@@ -1,4 +1,5 @@
 #include "ext2.h"
+//#include "dir.h"
 #include<stdio.h>
 #include<string.h>
 
@@ -139,6 +140,5 @@ int formatacao() {
     
     fs_create(volume_name);
 
-   // dir_root_create();
-
+    dir_root_create();
 }
