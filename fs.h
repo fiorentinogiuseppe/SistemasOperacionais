@@ -85,19 +85,6 @@ int fs_init() {
 	return 0;
 }
 
-int fs_start() {
-
-	int flag = 0;
-	//inicializacao
-	flag = fs_init();
-	// chama api
-	if (flag >= 0) //fs_command_loop();
-		printf("LOOP");
-	//fecha o arquivo 
-	fs_close();
-    
-}
-
 int fs_close() {
     if (fp != NULL) fclose(fp);
 }
