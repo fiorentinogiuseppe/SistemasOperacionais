@@ -26,13 +26,13 @@
 
 //Padroes de info
 #define FORMAT 0
-#define LS 2
-#define CREATE 3
-#define DELETE 4
-#define CD 5
-#define READ 6
-#define WRITE 7
-#define EXIT 8
+#define LS 1
+#define CREATE 2
+#define DELETE 3
+#define CD 4
+#define READ 5
+#define WRITE 6
+#define EXIT 7
 
 /*
  * Special numbers
