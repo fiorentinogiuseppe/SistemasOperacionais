@@ -9,7 +9,6 @@
 //Lista de comandos
 char *commands[] = {
     "format",
-    "password",
     "ls",
     "create",
     "delete",
@@ -18,7 +17,6 @@ char *commands[] = {
     "write",
     "exit"
 };
-
 
 /** file **/
 int is_file(uint16_t inode_id, inode *ind, char *file_name);
