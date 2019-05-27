@@ -22,7 +22,7 @@
 #define INDEX_LIMIT 2097152 // 4096*512
 #define INDEX_BLOCKS 4096
 #define PATH "DiscoVirtual"
-#define COMMAND_SIZE 10
+#define COMMAND_SIZE 9
 
 //Padroes de info
 #define FORMAT 0
@@ -264,19 +264,14 @@ int formatacao() {
 /* FS */
 //Busca o Inode vazio
 int get_empty_inode() {
-	//
 	int array_index = 0;
 	int bit_index = 0;
-	//Busca o inode vazio 
 	for (int i = 0; i < INDEX_BLOCKS; ++i) {
 		array_index = i / 64;
 		bit_index = i % 64;
-		//1L long type of 1.
-		//Mascara para pegar o bitmap desejado
-		//*****************************************************
 		if (! (inode_bitmap[array_index] & (1L << (63-bit_index)))) {
-        		return i+1; //Encontra o ultimo cheio e retorna o proximo que esta vazio
-        	}
+			return i+1;
+		}
 	}
 	return -1;
 }
