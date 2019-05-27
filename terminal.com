@@ -49,12 +49,14 @@ int fs_command_loop() {
     /** command **/
     char command[16];
     uint8_t matched;
+	char teste;
     while (flag >= 0) {
         printf("[giuseppe@bcc-ufrpe]:%s$ ", global_path);
         scanf("%s", &command);
         matched = 0;
         for (uint8_t i = 0; i < COMMAND_SIZE; ++i) {
-		printf("%i\n",i);
+		printf("%i. Press ENter...",i);
+		scanf("%c",&teste);
             if (strcmp(command, commands[i]) == 0) {
                 switch (i) {
                     case FORMAT:
@@ -85,6 +87,9 @@ int fs_command_loop() {
                 matched = 1;
                 break;
             }
+			else{
+			printf("nao\n");
+		}
         }
         if (! matched) {
             printf("Invalid Command '%s', Retry. \n", command);            
@@ -195,7 +200,7 @@ int dir_create(uint16_t inode_id, inode *ind, char *file_name) {
     }
     
     if (is_exists < 0) {
-        int new_inode_id = buscaInodeVazio();
+        int new_inode_id = get_empty_inode();
         int inodeAlloc_result = inodeAlloc(new_inode_id);
         if (inodeAlloc_result < 0) return -1;
         inode new_dir_inode;
@@ -401,7 +406,7 @@ int file_create(uint16_t inode_id, inode *ind, char *file_name) {
         }
     }
     if (is_exists < 0) {
-        int new_inode_id = buscaInodeVazio();
+        int new_inode_id = get_empty_inode();
         int inodeAlloc_result = inodeAlloc(new_inode_id);
         if (inodeAlloc_result < 0) return -1;
         inode new_inode;
