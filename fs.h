@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
+/***********INODE***********/
+
 //Valores default
 #define EXT2_NAME_LENGTH 15
 #define EXT2_PTR_LENGTH 8
@@ -19,33 +21,19 @@
 #define ONE_INDEX_BLOCKS 256
 #define INDEX_LIMIT 2097152 // 4096*512
 #define INDEX_BLOCKS 4096
-#define PATH "vDisk"
+#define PATH "DiscoVirtual"
 #define COMMAND_SIZE 10
 
+//Padroes de info
 #define FORMAT 0
 #define LS 2
 #define CREATE 3
 #define DELETE 4
 #define CD 5
-#define CLOSE 6
-#define READ 7
-#define WRITE 8
-#define EXIT 9
+#define READ 6
+#define WRITE 7
+#define EXIT 8
 
-char *commands[] = {
-    "format",
-    "password",
-    "ls",
-    "create",
-    "delete",
-    "cd",
-    "close",
-    "read",
-    "write",
-    "exit"
-};
-
-/***********INODE***********/
 /*
  * Special numbers
  */
@@ -61,7 +49,7 @@ char *commands[] = {
 //Physical Layout of the EXT2 File system
 //bg de block group
 //Bitmap = Keeps track of which blocks are free/used
-typedef struct mygroup_descriptor
+typedef struct group_descriptor
 {
     char bg_volume_name[EXT2_NAME_LENGTH + 1];          /* Nome do "volume"*/
     uint16_t bg_block_bitmap;        			/* Blocks bitmap block */ 
@@ -73,8 +61,10 @@ typedef struct mygroup_descriptor
 } group_descriptor;
 
 //EXT2 Inode
-
-typedef struct myinode {
+/*
+ * second extended file system inode data in memory
+ */
+typedef struct inode {
     time_t tmpa;                  // data de acesso
     time_t tmpc;                  // data criação
     time_t tmpm;                  // delete modificacao
@@ -89,7 +79,8 @@ typedef struct myinode {
 /*
  * Structure of a directory entry
  */
-typedef struct mydir_entry {
+//Mistura do ext2_dir_entry_2 e ext2_dir_entry
+typedef struct dir_entry {
     uint16_t inod;                  // index number
     uint16_t rec_len;                // comprimento do item de diretório
     uint16_t name_len;               // comprimento da pasta
@@ -103,16 +94,15 @@ typedef struct mydir_entry {
 /***********FS***********/
 // global var 
 group_descriptor group_desc;
+FILE *fp;
 
 uint16_t root_dir_inode_id;
 uint16_t current_file_inode_id;
 uint16_t current_dir_inode_id;
+uint64_t inode_bitmap[BLOCK_SIZE/8] = {0}; //Mapa de bits de inode
+uint64_t block_bitmap[BLOCK_SIZE/8] = {0}; //Mapa de bits de blocks
 char global_path[EXT2_NAME_LENGTH] = "/";
 
-FILE *fp;
-
-uint64_t inode_bitmap[BLOCK_SIZE/8] = {0};
-uint64_t block_bitmap[BLOCK_SIZE/8] = {0};
 
 /**** Declaracoes ****/
 
@@ -123,11 +113,11 @@ int fs_start();
 int fs_close();
 int formatacao();
 int fs_check();
-int fs_create(char *volume_name/*, char *psw*/);
+int fs_create(char *volume_name);
 int fs_delete();
 
 /**INODE**/
-int getEmptyInode();
+int get_empty_inode();
 int inodeAlloc(uint16_t id);
 int inodeFree(uint16_t id);
 int inodeWrite(uint16_t id, inode *ind);
@@ -161,7 +151,7 @@ int dir_root_create();
 /* FS */
 /**Funcoes de carga do sistema de arquivos**/
 int fs_init() {
-	printf("Iniciando Sistema...\n");
+	printf("Iniciando...\n");
 	// Verifica se o sistema de arquivos existe 
 	int retorno = fs_check();
 	//Se o retorno
@@ -173,7 +163,7 @@ int fs_init() {
 		// load fs 
 		fp = fopen(PATH, "r+");
 		if (fp == NULL) {
-			printf("ERROR DE INICIALIZACAO\nExiting...\n");
+			printf("ERROR DE INICIALIZACAO\nSaindo...\n");
 			return -1;
 		}
 		load_global();
@@ -181,11 +171,12 @@ int fs_init() {
 	return 0;
 }
 
+//Fecha o arquivo
 int fs_close() {
     if (fp != NULL) fclose(fp);
 }
 
-/**CRUD do sistema de arquivos**/
+//Verifica se o arquivo existe
 int fs_check() {
 	fp = fopen(PATH, "r+");
 	if (fp == NULL) {
@@ -194,34 +185,43 @@ int fs_check() {
 	return 0;
 }
 
-
-int fs_create(char *volume_name/*, char *psw*/) {
-    uint16_t zero_size_64 = BLOCK_SIZE / 8;
-    uint64_t zero[zero_size_64];
-    memset(zero, 0, sizeof(zero));
-    for (uint16_t i = 0; i < BLOCKS; ++i) {
-        fseek(fp, i*BLOCK_SIZE, SEEK_SET);
-        fwrite(zero, sizeof(zero), 1, fp);
-    }
-    fflush(fp);
-    strcpy(group_desc.bg_volume_name, volume_name);
-    group_desc.bg_inode_bitmap = 1;
-    group_desc.bg_block_bitmap = 2;
-    group_desc.bg_inode_table = 3;
-    group_desc.bg_free_blocks_count = BLOCK_SIZE * 8;
-    group_desc.bg_free_inodes_count = BLOCK_SIZE * 8;
-    group_desc.bg_used_dirs_count = 0;
-    //strcpy(group_desc.psw, psw);
-    fseek(fp, 0, SEEK_SET);
-    fwrite(&group_desc, sizeof(group_desc), 1, fp);
-    fflush(fp);
+//Cria o o volume
+int fs_create(char *volume_name) {
+	uint16_t zero_size_64 = BLOCK_SIZE / 8;
+	uint64_t zero[zero_size_64];
+	//Seta zero com 0
+	memset(zero, 0, sizeof(zero));
+	for (uint16_t i = 0; i < BLOCKS; ++i) {
+		fseek(fp, i*BLOCK_SIZE, SEEK_SET);
+		fwrite(zero, sizeof(zero), 1, fp);
+	}
+	//Limpa o fp
+	fflush(fp);
+	//copia a string para o bg_volume_name
+	strcpy(group_desc.bg_volume_name, volume_name);
+	
+	//Insere os dados
+	group_desc.bg_inode_bitmap = 1;
+	group_desc.bg_block_bitmap = 2;
+	group_desc.bg_inode_table = 3;
+	group_desc.bg_free_blocks_count = BLOCK_SIZE * 8;
+	group_desc.bg_free_inodes_count = BLOCK_SIZE * 8;
+	group_desc.bg_used_dirs_count = 0;
+	//Continua de onde o "ponteiro de busca" parou a busca
+	fseek(fp, 0, SEEK_SET);
+	//Escreve na posicao encontrada, ou seja no final do arquivo
+	fwrite(&group_desc, sizeof(group_desc), 1, fp);
+	//limpa fp
+	fflush(fp);
 }
 
-
+//Remove o arquivo path ou seja apaga o disco
 int fs_delete() {
     return remove(PATH);
 }
 
+//Carrega as informacoes do disco
+//As informacoes globais
 int load_global() {
     rewind(fp);
     fread(&group_desc, sizeof(group_desc), 1, fp);
@@ -232,81 +232,101 @@ int load_global() {
     root_dir_inode_id = current_dir_inode_id = 1;
 }
 
+//Formatacao do disco
 int formatacao() {
 
-    printf("FS Formating...\n");
-    
-    if (fs_check(PATH) == 0) {
-        fs_delete(PATH);
-    }
-
-    fp = fopen(PATH, "w+");
-    if (fp == NULL) {
-        printf("ERROR\nExiting...\n");
-        return -1;
-    }
-
-    printf("Input Volume Name\n");
-    char volume_name[16];
-    scanf("%s", volume_name);
-    
-    fs_create(volume_name);
-
-    dir_root_create();
-}
-//INODE
-
-int getEmptyInode() {
-    int array_index = 0;
-    int bit_index = 0;
-    for (int i = 0; i < INDEX_BLOCKS; ++i) {
-        array_index = i / 64;
-        bit_index = i % 64;
-        if (! (inode_bitmap[array_index] & (1L << (63-bit_index)))) {
-            return i+1;
-        }
-    }
-    return -1;
+	printf("FS Formating...\n");
+   	
+	//Verifica se o path existe, caso exista deleta
+	if (fs_check(PATH) == 0) {
+		fs_delete(PATH);
+	}
+	
+	//Abre o arquivo
+	fp = fopen(PATH, "w+");
+	//Verifica se foi aberto com sucesso
+	if (fp == NULL) {
+		printf("ERROR\nExiting...\n");	
+		return -1;
+	}
+	
+	//Pede o nome do volume, exemplo disco C
+	printf("Nome do volume: \n");
+	char volume_name[16];
+	scanf("%s", volume_name);
+    	
+	//Cria o volume
+	fs_create(volume_name);
+	//Cria o diretorio /
+	dir_root_create();
 }
 
+/* FS */
+//Busca o Inode vazio
+int get_empty_inode() {
+	//
+	int array_index = 0;
+	int bit_index = 0;
+	//Busca o inode vazio 
+	for (int i = 0; i < INDEX_BLOCKS; ++i) {
+		array_index = i / 64;
+		bit_index = i % 64;
+		//1L long type of 1.
+		//Mascara para pegar o bitmap desejado
+		//*****************************************************
+		if (! (inode_bitmap[array_index] & (1L << (63-bit_index)))) {
+        		return i+1; //Encontra o ultimo cheio e retorna o proximo que esta vazio
+        	}
+	}
+	return -1;
+}
+
+//Alocacao do inode
 int inodeAlloc(uint16_t id) {
 	fp = fopen(PATH, "r+");
 	if (fp == NULL) {
-            printf("Open FS Failed, Exiting...\n");
+            printf("Erro ao abrir o arquivo, Exiting...\n");
             return -1;
         }
-
+	
+	//volta 1 posicao na posicao em que se quer alocar
 	int array_index = ( id-1) / 64;
 	int bit_index = ( id-1) % 64;
+	//Verificar a posicao no mapa de bit se tiver esse arquivo ja existe
 	if (inode_bitmap[array_index] & (1L << (63-bit_index))) return -1;
+	
+	//Se nao tiver vai buscar para adicionar
 	inode_bitmap[array_index] |= (1L << (63-bit_index));
+	fseek(fp, BLOCK_SIZE, SEEK_SET);
+	//Escreve no inode_bitmap
+	fwrite(inode_bitmap, sizeof(inode_bitmap), 1, fp);
+	//Diminui a memoria livre
+	--group_desc.bg_free_inodes_count;
+	//Escreve no group desc
+	fseek(fp, 0, SEEK_SET);
+	fwrite(&group_desc, sizeof(group_desc), 1, fp);
+	fflush(fp);
+	//Se deu bom retorna 0
+	return 0;
+}
 
-	printf("[inodeAlloc] array_index = %d, bit_index = %d, | = %llx\n", array_index, bit_index, (1L << (63-bit_index)));
-	printf("[inodeAlloc] inode_bitmap[array_index] = %llx\n", inode_bitmap[array_index]);
-
+//Libera inode, ou seja o inverso do aloc
+int inodeFree(uint16_t id) {
+	//Igual ao de alocar
+	int array_index = ( id-1) / 64;
+	int bit_index = ( id-1) % 64;
+	if (! (inode_bitmap[array_index] & (1L << (63-bit_index)))) return 0;
+	inode_bitmap[array_index] &= (~(1L << (63-bit_index)));
 	fseek(fp, BLOCK_SIZE, SEEK_SET);
 	fwrite(inode_bitmap, sizeof(inode_bitmap), 1, fp);
-	--group_desc.bg_free_inodes_count;
+	++group_desc.bg_free_inodes_count;
 	fseek(fp, 0, SEEK_SET);
 	fwrite(&group_desc, sizeof(group_desc), 1, fp);
 	fflush(fp);
 	return 0;
 }
 
-int inodeFree(uint16_t id) {
-    int array_index = ( id-1) / 64;
-    int bit_index = ( id-1) % 64;
-    if (! (inode_bitmap[array_index] & (1L << (63-bit_index)))) return 0;
-    inode_bitmap[array_index] &= (~(1L << (63-bit_index)));
-    fseek(fp, BLOCK_SIZE, SEEK_SET);
-    fwrite(inode_bitmap, sizeof(inode_bitmap), 1, fp);
-    ++group_desc.bg_free_inodes_count;
-    fseek(fp, 0, SEEK_SET);
-    fwrite(&group_desc, sizeof(group_desc), 1, fp);
-    fflush(fp);
-    return 0;
-}
-
+//Busca e escreve no armazenamento
 int inodeWrite(uint16_t id, inode *ind) {
 	if (ind == NULL) return -1;
 	fseek(fp, 3*BLOCK_SIZE+(id-1)*INODE_SIZE, SEEK_SET);
@@ -315,19 +335,22 @@ int inodeWrite(uint16_t id, inode *ind) {
 	return 0;
 }
 
+//Busca e lê no armazenamento. Pula o inicio, pois é o root
 int inodeRead(uint16_t id, inode *ind) {
     if (ind == NULL) return -1;
     fseek(fp, 3*BLOCK_SIZE+( id-1)*INODE_SIZE, SEEK_SET);
-    fread(ind, sizeof(inode), 1, fp);
+    fread(ind, sizeof(ind), 1, fp);
     return 0;
 }
 
+//Inicia o inode zerado
 int inodeInit(inode *ind) {
     if (ind == NULL) return -1;
     memset(ind, 0, sizeof(inode));
     return 0;
 }
 
+//Lê o inode do root que esta no incio do arquivo.
 int inodeRoot(inode *ind) {
     if (ind == NULL) return -1;
     fseek(fp, 3*BLOCK_SIZE, SEEK_SET);
@@ -335,7 +358,7 @@ int inodeRoot(inode *ind) {
     return 0;
 }
 
-//BLOCK INODE
+/* Block Inode */
 int indBlck_write(uint16_t  id, inode *ind, char *data, uint32_t data_size) {
     return indBlck_append( id, ind, data, data_size, 0);
 }
@@ -611,7 +634,7 @@ int indBlck_get_block_by_num(uint16_t  id, inode  *ind, uint32_t block_num) {
     return block_id;
 }
 
-//BLOCK
+/* Block */
 
 int get_empty_block() {
     int array_index = 0;
@@ -701,10 +724,10 @@ int indBlck_read(uint16_t  id, inode *ind, char *data, uint32_t data_size) {
     return 0;
 }
 
-/** DIR ROOT**/
+/* Dir root */
 
 int dir_root_create() {
-    int inode_id = getEmptyInode(); // 1
+    int inode_id = get_empty_inode(); // 1
     int inodeAlloc_result = inodeAlloc(inode_id);
     if (inodeAlloc_result < 0) {
         return -1;
