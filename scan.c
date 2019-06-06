@@ -5,7 +5,7 @@ it scans up servicing the requests that it didn't get going down.
 If a request comes in after it has been scanned it will not be serviced
 until the process comes back down or moves back up.
 */
-
+//print printar as extremidades como campo de visita
 #include <stdio.h>
 #include <stdlib.h>
 
